@@ -1,0 +1,26 @@
+'use strict';
+
+/**
+ * Module dependencies.
+ */
+var users = require('../../app/controllers/users'),
+	dashboards = require('../../app/controllers/dashboards');
+
+module.exports = function(app) {
+
+	app.route('/dashboards/:dashboardId')
+	    .get(users.requiresLogin, dashboards.read)
+		.put(users.requiresLogin, dashboards.hasAuthorization, dashboards.update)
+	    .delete(users.requiresLogin, dashboards.hasAuthorization, dashboards.delete);
+		
+	app.route('/dashboards')
+		.get(users.requiresLogin, dashboards.list)
+		.post(users.requiresLogin, dashboards.hasCreateAuthorization, dashboards.create);
+
+
+	
+
+
+	// Finish by binding the article middleware
+	app.param('dashboardId', dashboards.dashboardByID);
+};

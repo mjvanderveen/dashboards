@@ -1,0 +1,91 @@
+{
+  "name": "Private dashboards",
+  "version": "0.0.1",
+  "description": "Dashboard ",
+  "dependencies": {
+    "bootstrap": "~3.1",
+	"jquery": "~2.2.1",
+	"leaflet" : "~0.7.7",
+	"cartodb.js": "~3.15.9",
+	"angular" : "~1.5.0",
+	"materialize": "*",
+	"mdi": "~1.5.54",
+	"dcjs": "2.0.0-beta.3",
+	"lodash" : "~2.4.1",
+	"angular-lodash" : "*",
+	"angular-route" : "*",
+	"angular-resource" : "*",
+	"angular-cookies" : "*",
+	"angular-touch" : "*",
+	"angular-sanitize" : "*",
+	"angular-ui-router" : "~0.2.10",
+	"angular-bootstrap" : "*",
+	"angular-leaflet-directive" : "0.10.0",
+	"leaflet-search" : "~1.8.3",
+	"leaflet-ajax" : "~2.0.0",
+	"angular-gettext" : "*",
+	"Snap.svg" : "*",
+	"d3": "*",
+	"crossfilter" : "*"
+	
+  },
+  
+  "install" : {
+        "base":  "public/build/bower",
+        "path" : {
+            "js": "{name}/js",
+            "css": "{name}/css",
+			"scss": "{name}/css",
+			"map": "{name}/css",
+            "eot": "{name}/fonts",
+            "svg": "{name}/fonts",
+            "ttf": "{name}/fonts",
+            "woff": "{name}/fonts",
+			"woff2": "{name}/fonts",
+			"png": "{name}/img"
+        } ,      
+    "sources" : {
+      "bootstrap" : [
+        "public/lib/bootstrap/dist/js/bootstrap.min.js",
+        "public/lib/bootstrap/dist/css/bootstrap.min.css",
+		"public/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.eot",
+		"public/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.svg",
+		"public/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf",
+		"public/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff"	
+      ],
+	  "jquery" : [
+        "public/lib/jquery/dist/jquery.min.js"	
+      ],
+	  "cartodb.js" : [
+        "public/lib/cartodb.js/cartodb_noleaflet.js",
+		"public/lib/cartodb.js/themes/css/cartodb.css"
+      ],
+	  "angular" : [
+        "public/lib/angular/angular.min.js",
+		"public/lib/angular/angular.js",
+		"public/lib/angular/angular-csp.css"
+      ],
+	  "angular-ui-router" : [
+        "public/lib/angular-ui-router/release/angular-ui-router.min.js"
+      ],
+	  "crossfilter" : [
+        "public/lib/crossfilter/crossfilter.min.js"
+      ],
+	  "lodash" : [
+        "public/lib/lodash/dist/lodash.underscore.min.js"
+      ],
+	  "mdi" : [
+        "public/lib/mdi/css/materialdesignicons.min.css",
+		"public/lib/mdi/css/materialdesignicons.min.css.map",
+		"public/lib/mdi/fonts/materialdesignicons-webfont.eot",
+		"public/lib/mdi/fonts/materialdesignicons-webfont.svg",
+		"public/lib/mdi/fonts/materialdesignicons-webfont.ttf",
+		"public/lib/mdi/fonts/materialdesignicons-webfont.woff",
+		"public/lib/mdi/fonts/materialdesignicons-webfont.woff2"
+      ]
+
+	  
+	  
+    }
+  }
+}

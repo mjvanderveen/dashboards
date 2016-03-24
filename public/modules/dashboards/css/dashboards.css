@@ -1,0 +1,104 @@
+.dc-chart g.row text {
+    fill: black;
+    font-size:0.8em;
+}
+
+.dc-chart .pie-slice {
+    fill:black;
+}
+
+.x-axis-label{
+    font-size:0.8em;
+}
+
+#where-chart{
+    height:360px;
+    width:100%;
+}
+
+#wheretitle{
+    padding-bottom:10px;
+}
+
+#header{
+    padding-bottom:20px;
+    border-bottom-color: #dddddd;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    margin-bottom:20px;
+}
+
+.colheight{
+    height:450px;
+}
+
+.removepadding {
+    padding-right:0px;
+    padding-left:0px;
+}
+    
+ .where-chart {
+    width:100%;
+ }
+ 
+ .where-info{
+    padding:5px;
+    background-color:white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+ }
+ 
+ #svgrefugeeshelped,#svglogistics {
+   position: relative; 
+   width: 100%; /* for IE 6 */
+}
+
+.refugeenumber { 
+   position: absolute; 
+   top: -10px; 
+   left: 130px; 
+   width: 100%; 
+   font-weight: bold;
+   color: #FFFFFF;
+   
+}
+
+.refugeenumber.subtitle { 
+   position: absolute; 
+   top: 30px; 
+   left: 80px; 
+   width: 100%; 
+   color: #FFFFFF;
+   
+}
+
+.refugeenumber.footnote { 
+   position: absolute; 
+   top: 258px; 
+   left: 95px; 
+   width: 100%; 
+   color: #FFFFFF;
+   font-size: 9px;
+   
+}
+
+.deployments { 
+   position: absolute; 
+   top: 135px; 
+   left: 20px; 
+   width: 100%; 
+   font-weight: bold;
+   color: #FFFFFF;
+   
+}
+
+.beds { 
+   position: absolute; 
+   top: 160px; 
+   left: 145px; 
+   width: 100%; 
+   color: #016699;
+   
+}
+
