@@ -31,6 +31,13 @@ $ sudo npm install -g bower
 $ sudo npm install -g grunt-cli
 ```
 
+* Install NPM modules
+This might not install all required modules. TODO: edit package.json
+
+```
+$ npm install
+```
+
 * Apache
 Make sure you install apache through [xamppserver] (https://www.apachefriends.org/download.html). 
 Use the httpd.conf in tools/ (for windows, or alter for unix).
