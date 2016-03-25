@@ -8,14 +8,9 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 		$scope.geom = null;
 
 		$scope.config =  {
-							title:'Vluchtelingenhulpverlening',
-							description:'Wat doet het Rode Kruis voor de vluchtelingen in Nederland?',
-							data:'modules/dashboards/data/data.json',
-							refugeesHelpedFieldName:'RefugeesHelped',
 							whereFieldName:'districtcode',
-							geo:'modules/dashboards/data/districten.geojson',
-							joinAttribute:'tdn_code',
-							nameAttribute:'provnaam',
+							joinAttribute:'id',
+							nameAttribute:'district',
 							color:'#03a9f4'
 						};	
 						
@@ -48,7 +43,7 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 		/**
 		* load the data from cartodb
 		*/ 
-		$scope.loadGeoJson = function(id){
+		$scope.loadCartoDB = function(id){
 			var d = $q.defer();
 		    var result = CartoDB.get({table: id}, function() {
 				d.resolve(result);
@@ -56,16 +51,6 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 		    
 			return d.promise;
 		};
-		
-		$scope.loadArray = function(id){
-			var d = $q.defer();
-		    var result = CartoDB.get({table: id}, function() {
-				d.resolve(result);
-		    });
-		    
-			return d.promise;
-		};
-		
 		
 		/**
 		 * get the data from the files as defined in the config.
@@ -75,8 +60,8 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			
 			// Get data through $resource query to server, and only get data when all requests have resolved
 			$q.all([
-			   $scope.loadGeoJson( 'Districts' ), // table with geo data that will be put on the choropleth map
-			   $scope.loadArray( 'Ready2Helpers' )
+			   $scope.loadCartoDB( 'Districts' ), // table with geo data that will be put on the choropleth map
+			   $scope.loadCartoDB( 'Ready2Helpers' )
 			   
 			]).then(function(data) {
 			   
@@ -88,42 +73,13 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			  $scope.generateCharts(d);
 			   
 			});
-			
-			
-			/*	
-			$scope.dataCall = $.ajax({ 
-				type: 'GET', 
-				url: $scope.config.data, 
-				dataType: 'json',
-			});
-
-			//load geometry
-
-			$scope.geomCall = $.ajax({ 
-				type: 'GET', 
-				url: $scope.config.geo, 
-				dataType: 'json',
-			});
-
-			//when both ready construct charts
-			$.when($scope.dataCall, $scope.geomCall).then(function(dataArgs, geomArgs){
-				
-				var geom = geomArgs[0];
-				geom.features.forEach(function(e){
-					e.properties[$scope.config.joinAttribute] = String(e.properties[$scope.config.joinAttribute]); 
-				});
-					
-				// generate the charts
-				$scope.generateCharts(dataArgs[0],geom);
-			});
-			*/
 		};
 
 		// fill the lookup table with the name attributes
-		$scope.genLookup = function (geojson,config){
+		$scope.genLookup = function (){
 			var lookup = {};
-			geojson.features.forEach(function(e){
-				lookup[e.properties[config.joinAttribute]] = String(e.properties[config.nameAttribute]);
+			$scope.geom.features.forEach(function(e){
+				lookup[e.properties[$scope.config.joinAttribute]] = String(e.properties[$scope.config.nameAttribute]);
 			});
 			return lookup;
 		};
@@ -135,22 +91,29 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 		 */
 		$scope.generateCharts = function (data){
 			
+			// Set geom
+			$scope.geom = data.Districts;	
+			
+			// simplify objects for easier access
+			var d = [];
+			d.Districts = data.Districts.features;
+			d.Ready2Helpers = data.Ready2Helpers.rows;
+			
 			// get the lookup table
-			//var lookup = $scope.genLookup(geom,$scope.config);
+			var lookup = $scope.genLookup();
 			
 			/* create a crossfilter object from the data
 			 * Data arrays are of same length
 			 * tell crossfilter that  data is just a set of keys
 			 * and then define your dimension and group functions to actually do the table lookup.
 			 */
-			
-			var cf = crossfilter(d3.range(0, data.Districts.length));
+			var cf = crossfilter(d3.range(0, data.Districts.features.length));
 		
-			// create the dimensions
-			var whereDimension = cf.dimension(function(i) { return data.Districts[i].districtcode; });
-			var ready2HelpersDimension = cf.dimension(function(i) { return data.Ready2Helpers.number; });
-			//var whereDimension = cf.dimension(function(d){ return d[$scope.config.whereFieldName]; });
-			//var refugeesHelpedDimension = cf.dimension(function(d){ return d[$scope.config.refugeesHelpedFieldName]; });
+			// The wheredimension returns the unique identifier of the geo area
+			var whereDimension = cf.dimension(function(i) { return d.Districts[i].properties.id; });
+			
+			// Additional dimension return any value required
+			var ready2HelpersDimension = cf.dimension(function(i) {	return d.Ready2Helpers[i].number; });	
 
     		// create the groups
 			var ready2HelpersGroup = ready2HelpersDimension.group();
@@ -170,7 +133,7 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 				group: whereGroup,
 				center: [0,0],
 				zoom: 0,
-				geojson: data.Districts,
+				geojson: data.Districts, // this requires the full geojson object
 				featureOptions: {
 									'fillColor': 'white',
 									'color': 'gray',
@@ -186,13 +149,13 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 												} else {
 													return 0;
 												}
-											},           
+											},
+				// this is the unique id of the geo area. Has to refer to the identifier in the whereDimension
 				featureKeyAccessor: function(feature){
-										return feature.properties[$scope.config.joinAttribute];
+										return feature.properties.id;
 									},
 				popup: function(d){
-							return '';
-							//return lookup[d.key];
+							return lookup[d.key];
 						},
 				renderPopup: true
 				
@@ -201,25 +164,27 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			// create the data table
 			dc.dataTable('#data-table')
 						.dimension(whereDimension)                
-						.group(function (d) {
-							return d[ready2HelpersDimension];
+						.group(function (i) {
+							return ''; //ready2HelpersDimension[i];
 						})
 						.size(650)
 						.columns([
-							function(d){
-							   return d.district; 
+							function(i){
+							   return d.Districts[i].properties.district; 
 							},
-							function(d){
-							   return d.number; 
+							function(i){
+							   return d.Ready2Helpers[i].number;
 							}
-						]);  
+						])
+						.sortBy(function (i) {
+							  return d.Districts[i].properties.district;
+						});
 
 			
 			// we need this becuase we used d3 to load the data and we are outside the angular space
             //$scope.$apply();
 
-			// Set geom
-			$scope.geom = data.Districts;	
+			dc.renderAll();
 		};
 		
 		/**
