@@ -27,7 +27,6 @@ module.exports = {
 	assets: {
 		lib: {
 			css: [
-				'public/lib/forms-angular/css/forms-angular-bs3.css',
 				'public/lib/bootstrap/dist/css/bootstrap.min.css',
 				'public/lib/bootstrap/dist/css/bootstrap-theme.css',
 				'public/lib/bootstrap-glyphicons/css/bootstrap.icon-large.min.css',
@@ -77,7 +76,6 @@ module.exports = {
 				'public/lib/angular-ui-select2/src/select2.js',
 				'public/lib/ckeditor/ckeditor.js',
 				'public/lib/ng-ckeditor/ng-ckeditor.min.js',
-				'public/lib/forms-angular/forms-angular.js',
 				'public/lib/angular-carousel/dist/angular-carousel.min.js',
 				'https://maps.googleapis.com/maps/api/js?v=3&sensor=true',
 				'public/lib/leaflet-search/dist/leaflet-search.min.js',

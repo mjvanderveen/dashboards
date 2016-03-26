@@ -53,8 +53,8 @@ module.exports = function(app) {
 	app.route('/auth/github/callback').get(users.oauthCallback('github'));
 	
 	// Setting the azure oauth routes
-	app.route('/auth/azure').get(passport.authenticate('azure'));
-	app.route('/auth/azure/callback').get(users.oauthCallback('azure'));
+	app.route('/auth/azure').get(passport.authenticate('azureoauth'));
+	app.route('/auth/azure/callback').get(users.oauthCallback('azureoauth'));
 
 	// Finish by binding the user middleware
 	app.param('userId', users.userByID);
