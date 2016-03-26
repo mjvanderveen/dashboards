@@ -18,6 +18,8 @@ $ sudo apt-get install npm
 ```
 $ sudo apt-get install mongodb
 ```
+* Make sure mongodb is running as a service
+
 sudo apt-get install mongodb
 * Bower - You're going to use the [Bower Package Manager](http://bower.io/) to manage your front-end packages, in order to install it make sure you've installed Node.js and npm, then install bower globally using npm:
 
@@ -31,8 +33,7 @@ $ sudo npm install -g bower
 $ sudo npm install -g grunt-cli
 ```
 
-* Install NPM modules
-Now you have to include all the required packages for this application. These packages are not included by default in this repository.
+* Install NPM modules -  Now you have to include all the required packages for this application. These packages are not included by default in this repository.
 The below command will install all required npm modules in package.json to node_modules/.
 After that it will run bower-installer, which uses bower.json to include all client side libraries, and puts these in public/build/bower
 
@@ -40,16 +41,12 @@ After that it will run bower-installer, which uses bower.json to include all cli
 $ npm install
 ```
 
-* Apache
-The application can run on its own on the nodejs server, however, in many cases we would need to host multiple applications on a subdomain of a server.
+* Apache - The application can run on its own on the nodejs server, however, in many cases we would need to host multiple applications on a subdomain of a server.
 Apache will therefor serve as a proxy only.
 
-Make sure you install apache through [xamppserver] (https://www.apachefriends.org/download.html) for windows, or use the apache2 installer for unix. 
+* Make sure you install apache through [xamppserver] (https://www.apachefriends.org/download.html) for windows, or use the apache2 installer for unix. 
 Use the httpd.conf in tools/ (for windows, or alter for unix).
 Rename the localhost example key and certificate in config/cert/ by removing the .example extension
-
-* MongoDB
-Make sure mongodb is running as a service
 
 ## Getting Started With the Dashboard
 Edit the config/secrets.json.template to set your project secrets and save it to config/secrets.json
