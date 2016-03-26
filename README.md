@@ -32,14 +32,19 @@ $ sudo npm install -g grunt-cli
 ```
 
 * Install NPM modules
-This might not install all required modules. TODO: edit package.json
+Now you have to include all the required packages for this application. These packages are not included by default in this repository.
+The below command will install all required npm modules in package.json to node_modules/.
+After that it will run bower-installer, which uses bower.json to include all client side libraries, and puts these in public/build/bower
 
 ```
 $ npm install
 ```
 
 * Apache
-Make sure you install apache through [xamppserver] (https://www.apachefriends.org/download.html). 
+The application can run on its own on the nodejs server, however, in many cases we would need to host multiple applications on a subdomain of a server.
+Apache will therefor serve as a proxy only.
+
+Make sure you install apache through [xamppserver] (https://www.apachefriends.org/download.html) for windows, or use the apache2 installer for unix. 
 Use the httpd.conf in tools/ (for windows, or alter for unix).
 Rename the localhost example key and certificate in config/cert/ by removing the .example extension
 
