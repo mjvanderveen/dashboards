@@ -13,19 +13,20 @@ var CartoDB = require('cartodb'),
  * Get all rows from a table
  */
  
-exports.getTable = function(req, res, next, id){
+exports.getTable = function(req, res, next){
+	var id = req.params.table;
 
 	switch (id) {
 	  case 'Ready2Helpers':
-		return exports.getReady2Helpers(req, res, next, id);
+		return exports.getReady2Helpers(req, res, next);
 	  case 'Districts':
-		return exports.getDistricts(req, res, next, id);
+		return exports.getDistricts(req, res, next);
 	  default:
-		return exports.getDistricts(req, res, next, id);
+		return exports.getDistricts(req, res, next);
 	}	
 };
 
-exports.getReady2Helpers = function(req, res, next, id){
+exports.getReady2Helpers = function(req, res, next){
 
 	var sql = new CartoDB.SQL({user:secrets.cartodb.user, api_key:secrets.cartodb.api_key});
 
@@ -41,7 +42,7 @@ exports.getReady2Helpers = function(req, res, next, id){
 	  });	
 };
 
-exports.getDistricts = function(req, res, next, id){
+exports.getDistricts = function(req, res, next){
 
 	var sql = new CartoDB.SQL({user:secrets.cartodb.user, api_key:secrets.cartodb.api_key});
 

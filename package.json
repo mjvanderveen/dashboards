@@ -46,7 +46,10 @@
     "passport-twitter": "1.0.x",
     "passport-azure-oauth": "0.0.x",
     "url": "0.11.x",
-    "swig": "1.4.x"
+    "swig": "1.4.x",
+    "apicache": "0.0.x",
+    "cacher": "3.0.x",
+    "google-spreadsheet": "2.0.x"
   },
   "devDependencies": {
     "supertest": "*",

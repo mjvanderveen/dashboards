@@ -8,21 +8,20 @@
 var _ = require('lodash');
 
 var users = require('../../app/controllers/users'),	
-    cartodb = require('../../app/controllers/cartodb');
+    cartodb = require('../../app/controllers/cartodb'),
+    apicache = require('apicache').options({ debug: true }).middleware;
+    //Cacher = require("cacher");
+
+//var cacher = new Cacher().cache('seconds', 60);
 
 module.exports = function(app) {
-	/*app.route('/cartodb/ready2helpers')
-		.get(users.requiresLogin, cartodb.getReady2Helpers);
-		
-	app.route('/cartodb/districts')
-		.get(users.requiresLogin, cartodb.getDistricts);	*/
-	
-	// Cartodb Routes   
-	app.route('/cartodb/:table')
-		.get(users.requiresLogin, cartodb.getTable);
-		
-	
 
-	// Finish by binding the article middleware
-	app.param('table', cartodb.getTable);
+
+	// Finish by binding the middleware
+	//app.param('table', cartodb.getTable);
+
+	// Cartodb Routes   
+	app.route('/cartodb/:table').get(users.requiresLogin, apicache('5 minutes'), cartodb.getTable);
+		
+	
 };

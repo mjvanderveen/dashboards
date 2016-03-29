@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('dashboards').controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', '$window', '$stateParams',
-	function($scope, $q, Authentication, Dashboards, CartoDB, $window, $stateParams) {
+angular.module('dashboards').controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', '$window', '$stateParams',
+	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, $window, $stateParams) {
 		
 		$scope.authentication = Authentication;
 		$scope.dashboard = null;
@@ -52,6 +52,15 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			return d.promise;
 		};
 		
+		$scope.loadGoogleSpreadsheet = function(sid){
+			var d = $q.defer();
+		    var result = GoogleSpreadsheet.query({id: sid}, function() {
+				d.resolve(result);
+		    });
+		    
+			return d.promise;
+		};
+		
 		/**
 		 * get the data from the files as defined in the config.
 		 * load  them with ajax and if both are finished, generate the charts
@@ -61,7 +70,8 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			// Get data through $resource query to server, and only get data when all requests have resolved
 			$q.all([
 			   $scope.loadCartoDB( 'Districts' ), // table with geo data that will be put on the choropleth map
-			   $scope.loadCartoDB( 'Ready2Helpers' )
+			   $scope.loadCartoDB( 'Ready2Helpers' ),
+			   $scope.loadGoogleSpreadsheet('RodeKruisAfdelingen')
 			   
 			]).then(function(data) {
 			   

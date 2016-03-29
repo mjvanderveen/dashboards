@@ -32,6 +32,11 @@ exports.requiresLogin = function(req, res, next) {
 	next();
 };
 
+exports.requiresTest = function(req, res, next) {
+console.log('this matches');
+	next();
+};
+
 /**
  * User authorizations routing middleware
  */

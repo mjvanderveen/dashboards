@@ -12,7 +12,7 @@ var express = require('express'),
 	cookieParser = require('cookie-parser'),
 	helmet = require('helmet'),
 	passport = require('passport'),
-	mongoStore = require('connect-mongo')({
+	MongoStore = require('connect-mongo')({
 		session: session
 	}),
 	flash = require('connect-flash'),
@@ -77,7 +77,7 @@ module.exports = function(db) {
 	}
 
 	// Request body parsing middleware should be above methodOverride
-	app.use(bodyParser.urlencoded());
+	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(bodyParser.json());
 	app.use(methodOverride());
 
@@ -90,10 +90,12 @@ module.exports = function(db) {
 	// Express MongoDB session storage
 	app.use(session({
 		secret: config.sessionSecret,
-		store: new mongoStore({
+		store: new MongoStore({
 			db: db.connection.db,
 			collection: config.sessionCollection
-		})
+		}),
+		resave: true,
+        saveUninitialized: true
 	}));
 
 	// use passport session
