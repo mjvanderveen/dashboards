@@ -49,7 +49,8 @@
     "swig": "1.4.x",
     "apicache": "0.0.x",
     "cacher": "3.0.x",
-    "google-spreadsheet": "2.0.x"
+    "google-spreadsheet": "2.0.x",
+	"bower-installer" : "*"
   },
   "devDependencies": {
     "supertest": "*",
