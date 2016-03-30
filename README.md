@@ -19,6 +19,7 @@ $ sudo apt-get install npm
 $ sudo apt-get install mongodb
 ```
 * Make sure mongodb is running as a service
+* Install [Robomongo](http://app.robomongo.org/download.html) on windows for a GUI to access the objects stored in mongodb
 
 sudo apt-get install mongodb
 * Bower - You're going to use the [Bower Package Manager](http://bower.io/) to manage your front-end packages, in order to install it make sure you've installed Node.js and npm, then install bower globally using npm:
