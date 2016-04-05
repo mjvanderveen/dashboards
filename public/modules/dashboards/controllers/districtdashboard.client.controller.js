@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('dashboards').controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', '$window', '$stateParams',
-	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, $window, $stateParams) {
+angular.module('dashboards')
+	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', '$window', '$stateParams', '$http', '$timeout', 'cfpLoadingBar',
+	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, $window, $stateParams, $http, $timeout, cfpLoadingBar) {
 		
 		$scope.authentication = Authentication;
 		$scope.dashboard = null;
@@ -11,9 +12,20 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 							whereFieldName:'districtcode',
 							joinAttribute:'id',
 							nameAttribute:'district',
-							color:'#03a9f4'
+							color:'#0080ff'
 						};	
-						
+		
+		/**
+		 * Loading bar while waiting for data...
+		 */
+		$scope.start = function() {
+		  cfpLoadingBar.start();
+		};
+
+		$scope.complete = function () {
+		  cfpLoadingBar.complete();
+		};
+	
 		/**
 		 * Initiate the dashboard
 		 */
@@ -80,7 +92,11 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			  d.Ready2Helpers = data[1];
 			  d.Districts = data[0];
 			  
+			  $scope.start();
+			  
 			  $scope.generateCharts(d);
+			  
+			  $scope.complete();
 			   
 			});
 		};
@@ -100,6 +116,10 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 		 * geom is geojson file
 		 */
 		$scope.generateCharts = function (data){
+			
+			var districtChart = dc.rowChart('#row-chart');
+			var firstLetterChart = dc.pieChart('#fl-chart');
+			var mapChart = dc.leafletChoroplethChart('#map-chart');
 			
 			// Set geom
 			$scope.geom = data.Districts;	
@@ -121,13 +141,28 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 		
 			// The wheredimension returns the unique identifier of the geo area
 			var whereDimension = cf.dimension(function(i) { return d.Districts[i].properties.id; });
+			//var whereDimension2 = cf.dimension(function(i) { return d.Ready2Helpers[i].district; });
+			var whereDimensionFL = cf.dimension(function(i) {
+					return d.Districts[i].properties.district.substr(0,1);
+				});
+			
+			
+			//var whereGroupCount = whereDimension.group();
+			var whereGroupSum = whereDimension.group().reduceSum(function(i) { return d.Ready2Helpers[i].number;});
+			var whereGroupSumFL = whereDimensionFL.group().reduceSum(function(i) { return d.Ready2Helpers[i].number;});
 			
 			// Additional dimension return any value required
-			var ready2HelpersDimension = cf.dimension(function(i) {	return d.Ready2Helpers[i].number; });	
-
+			//var ready2HelpersDimension = cf.dimension(function(i) {	return d.Ready2Helpers[i].number; });	
+			
     		// create the groups
-			var ready2HelpersGroup = ready2HelpersDimension.group();
-			var whereGroup = whereDimension.group();
+			//var ready2HelpersGroup = ready2HelpersDimension.group();
+			//var whereGroup = whereDimension.group();
+			//var whereGroup = whereDimension.group(function(i) {return d.Ready2Helpers[i].number;});
+			//var whereGroupSum = ready2HelpersDimension.group().reduceSum(function(i) {return d.Ready2helpers[i].number;});
+			
+			//Edit Jannis
+			//var districtDimension = cf.dimension(function(i) { return d.Ready2Helpers[i].district;});
+			//var districtGroup = districtDimension.group().reduceSum(function(i) { return d.Ready2Helpers[i].number;});
 			
 			// group with all
 			var all = cf.groupAll();
@@ -140,7 +175,7 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			// create the mapchart
 			$scope.mapChartOptions = {
 				dimension: whereDimension,
-				group: whereGroup,
+				group: whereGroupSum,//Count,
 				center: [0,0],
 				zoom: 0,
 				geojson: data.Districts, // this requires the full geojson object
@@ -186,30 +221,117 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 							   return d.Ready2Helpers[i].number;
 							}
 						])
+						.order(d3.descending)
 						.sortBy(function (i) {
-							  return d.Districts[i].properties.district;
+							  return d.Ready2Helpers[i].number; //d.Districts[i].properties.district;
 						});
 
-			
+		
 			// we need this becuase we used d3 to load the data and we are outside the angular space
             //$scope.$apply();
-
+			
+			districtChart
+				.width(600)
+				.height(500)
+				.margins({top: 0, left: 10, right: 50, bottom: 20})
+				.dimension(whereDimension)
+				.group(whereGroupSum)
+				.colors(d3.scale.ordinal().range(['#0080ff']))
+				.ordering(function(d) { return -d.value; })
+				.label(function (d) { return lookup[d.key]; })
+				.title(function (d) { return d.value; })
+				.renderLabel(true)
+				//.labelOffsetX(10)
+				.renderTitleLabel(true)
+				.titleLabelOffsetX(-30)
+				//.titleLabelOffsetX(function(d) {return d.value; })
+				.elasticX(true)
+				//.xAxis(xAxis) //.ticks(4)
+				//.turnOnControls(true)
+				;
+			
+			firstLetterChart
+				.width(600)
+				.height(300)
+				.radius(100)
+				.innerRadius(50)
+				.dimension(whereDimensionFL)
+				.group(whereGroupSumFL)
+				.colors(d3.scale.linear().domain([0,5417]).range(['#CCCCCC', '#0080ff']))
+				.colorAccessor(function(d) { return d.value; })
+				.ordering(function(d) { return -d.value; })
+				.legend(dc.legend().x(140).y(0).gap(5))
+				//.label(function (d) { return d.key; })
+				//.title(function (d) { return d.value; })
+				//.renderLabel(true)
+				//.labelOffsetX(10)
+				//.renderTitleLabel(true)
+				//.titleLabelOffsetX(-30)
+				//.titleLabelOffsetX(function(d) {return d.value; })
+				//.elasticX(true)
+				//.xAxis(xAxis) //.ticks(4)
+				//.turnOnControls(true)
+				;
+				
+			mapChart
+				.width($('#map-chart').width())
+				.height(360)
+				.dimension(whereDimension)
+				.group(whereGroupSum)//Count)
+				.center([0,0])
+				.zoom(0)    
+				.geojson(data.Districts) //geom)
+				.colors(['#CCCCCC', $scope.config.color])
+				.colorDomain([0, 1])
+				.colorAccessor(function (d) {
+					if(d>0){
+						return 1;
+					} else {
+						return 0;
+					}
+				})           
+				.featureKeyAccessor(function(feature){
+					return feature.properties.id;
+				})
+				.popup(function(d){
+					return lookup[d.key];
+				})
+				.renderPopup(true)
+				.turnOnControls(true)
+				;
+			
+		
 			dc.renderAll();
-		};
+			
+			var map = mapChart.map();
+			
+			function zoomToGeom(geom){
+				var bounds = d3.geo.bounds(geom);
+				map.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
+			}
+			
+			zoomToGeom($scope.geom);
+					
+			
+			
+			};
+		
+		
 		
 		/**
 		 * Watch MapChart
-		 */
+		 
 		$scope.$watch('mapChart', function() {
+		//$scope.$watch('map-chart', function() {
                     if ($scope.mapChart) {
                         $scope.zoomToGeom($scope.mapChart.map());
                     }
                 });
 
-		
+		*/
 		/**
-		 * Zoom to the extend of the data
-		 */
+		 * Zoom to the extent of the data
+		 
 		$scope.zoomToGeom = function (map){
 			
 			if($scope.geom === null){
@@ -228,7 +350,7 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			map.fitBounds(bounds);			
 
 		};
-			
+		*/	
 
 
 		

@@ -3,47 +3,74 @@
 		<h3>{{dashboard.title}}</h3>
 	</div>
 	<div class="container">
-            <div id="header" class="row">
-                <div class="col-md-8">
+		<div cg-busy="{promise:promise,templateUrl:templateUrl,message:message,backdrop:backdrop,delay:delay,minDuration:minDuration}">
+			<div id="header" class="row">
+				<div class="col-md-8">
 					<div id="title">District Dashboard</div>
-                </div>
-                <div class="col-md-1">
-                </div>                            
-                <div id="count-info" class="col-md-3">
-                    <span class="filter-count "></span> selected out of <span class="total-count "></span> records.
-                </div>                    
-            </div>
-            <div class="row">
-                <div class="col-md-4 colheight">
-                    <div class="col-xs-12 removepadding">
-					    <dc-chart id="where-chart"
+				</div>
+				<div class="col-md-1">
+				</div>                            
+				<div id="count-info" class="col-md-4">
+					<span class="filter-count "></span> selected out of <span class="total-count "></span> records:   
+					<a href="javascript:dc.filterAll(); dc.redrawAll()">Reset All</a>
+				</div>                    
+			</div>
+			<div class="row">
+				<div class="col-md-4 colheight">
+					<div class="col-xs-12 removepadding">
+						<b>Rode Kruis districten in Nederland</b>
+						<div id="map-chart" style="width:300px; height:480px;"></div>						
+					</div>
+					<!--
+					<div class="col-xs-12 removepadding">
+						<dc-chart id="where-chart"
 							chart="mapChart"
 							type="mapChartType"
 							options="mapChartOptions"
 							style="display:block; width:300px; height:300px;">
 						</dc-chart> 
-                      
-                    </div>
-                </div>
+					</div>
+					-->
+				</div>
+				<!--
 				<div class="col-md-4 colheight">
-                    <div class="col-xs-6 removepadding">
-                    </div>
-                </div>
+					<div class="col-xs-6 removepadding">
+					</div>
+				</div>
+				-->
 				<div class="col-md-4 colheight">
-                                      
-                </div>
-            </div> 
+					<div class="col-xs-12 removepadding" id="row-chart">
+						<b>Aantal helpers per district</b>
+					</div>                  
+				</div>
+			</div> 
+			<br><br><br><hr>
 			<div class="row">
-                <div class="col-md-12">
-                     <table class="table table-hover" id="data-table">
-                      <thead>
-                        <tr class="header" id="tabletip">
-                          <th>District</th>
-                          <th>Aantal Ready2Helpers</th>                  
-                        </tr>
-                      </thead>
-                    </table>
-                </div>
-            </div>			
-        </div>
+				<div class="col-md-4 colheight">
+					<div class="col-xs-12 removepadding" id="fl-chart">
+						<b>Aantal helpers per 1e letter van district</b>
+					</div>                  
+				</div>
+			</div> 
+			<div class="row">
+				<div class="col-md-12">
+					 <table class="table table-hover" id="data-table">
+					  <thead>
+						<tr class="header" id="tabletip">
+						  <th>District</th>
+						  <th>Aantal Ready2Helpers</th>                  
+						</tr>
+					  </thead>
+					</table>
+				</div>
+			</div>
+			<!--
+			<div class="row">
+				<div class="col-md-12">
+					 <div id="row-chart"></div>
+				</div>
+			</div>		
+			-->
+		</div>
+	</div>
 </section>

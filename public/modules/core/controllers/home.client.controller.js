@@ -1,6 +1,7 @@
 'use strict';
 
-angular.module('core').controller('HomeController', ['$scope', 'Authentication', 'leafletData', function ($scope, Authentication, leafletData) {
+angular.module('core').controller('HomeController', ['$scope', 'Authentication', 'leafletData',
+	function ($scope, Authentication, leafletData) {
     $scope.authentication = Authentication;
     
 

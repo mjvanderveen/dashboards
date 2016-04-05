@@ -24,7 +24,9 @@ module.exports = {
 				'public/build/bower/mdi/css/materialdesignicons.min.css', // in bower.json
 				'public/build/bower/dcjs/css/dc.css', // in bower.json
 				'public/build/custom/dc-leaflet/css/dc-leaflet-legend.min.css', // NOT in bower.json
-				'public/build/bower/materialize/css/materialize.css' // in bower.json
+				'public/build/bower/materialize/css/materialize.css', // in bower.json
+				'public/build/bower/angular-loading-bar/css/loading-bar.css' // in bower.json
+				
 			],
 			js: [
 
@@ -56,7 +58,8 @@ module.exports = {
 				//'public/build/custom/leaflet-map/js/dc-leaflet.js', // NOT in bower.json
 				'public/build/bower/materialize/js/materialize.js',
 				'public/build/custom/leaflet-stamen/tile.stamen.js', // NOT in bower.json
-				'public/build/custom/angular-dc/js/angular-dc.js'
+				'public/build/custom/angular-dc/js/angular-dc.js',
+				'public/build/bower/angular-loading-bar/js/loading-bar.js'
 				
 				
 				

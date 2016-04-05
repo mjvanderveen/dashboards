@@ -14,6 +14,7 @@
 	"lodash" : "~2.4.1",
 	"angular-lodash" : "*",
 	"angular-route" : "*",
+	"angular-loading-bar" : "*",
 	"angular-resource" : "*",
 	"angular-cookies" : "*",
 	"angular-touch" : "*",
