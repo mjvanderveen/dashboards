@@ -1,8 +1,13 @@
 'use strict';
 
+<<<<<<< HEAD
 angular.module('dashboards')
 	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', '$window', '$stateParams', '$http', '$timeout', 'cfpLoadingBar',
 	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, $window, $stateParams, $http, $timeout, cfpLoadingBar) {
+=======
+angular.module('dashboards').controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', 'Dropbox', '$window', '$stateParams',
+	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, Dropbox, $window, $stateParams) {
+>>>>>>> 0af5c793eaa83d76aaaa7ee353e857521e165307
 		
 		$scope.authentication = Authentication;
 		$scope.dashboard = null;
@@ -73,6 +78,15 @@ angular.module('dashboards')
 			return d.promise;
 		};
 		
+		$scope.loadDropbox = function(f){
+			var d = $q.defer();
+		    var result = Dropbox.query({file: f}, function() {
+				d.resolve(result);
+		    });
+		    
+			return d.promise;
+		};
+		
 		/**
 		 * get the data from the files as defined in the config.
 		 * load  them with ajax and if both are finished, generate the charts
@@ -83,7 +97,8 @@ angular.module('dashboards')
 			$q.all([
 			   $scope.loadCartoDB( 'Districts' ), // table with geo data that will be put on the choropleth map
 			   $scope.loadCartoDB( 'Ready2Helpers' ),
-			   $scope.loadGoogleSpreadsheet('RodeKruisAfdelingen')
+			   $scope.loadGoogleSpreadsheet('RodeKruisAfdelingen'),
+			   $scope.loadDropbox('ready2helpers.csv')
 			   
 			]).then(function(data) {
 			   

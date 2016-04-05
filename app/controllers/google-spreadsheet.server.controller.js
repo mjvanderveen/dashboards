@@ -14,8 +14,9 @@ var GoogleSpreadsheet = require('google-spreadsheet'),
  * Get all rows from a table
  */
  
-exports.getSheet = function(req, res, next, id){
+exports.getSheet = function(req, res, next){
 
+    var id = req.params.id;
 	var key = secrets.googlespreadsheets.sheets[id].key;
 	var columns = secrets.googlespreadsheets.sheets[id].columns;
 	
