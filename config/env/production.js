@@ -123,8 +123,14 @@ module.exports = {
 		clientSecret: secrets.azure.clientSecret,
 		tenantId: secrets.azure.tenantId,
 		resource: 'https://graph.windows.net',
-		redirectURL: 'http://digidoc.rodekruis.nl/auth/azure/callback',
-		redirectURLSSL: 'https://digidoc.rodekruis.nl/auth/azure/callback'
+		redirectURL: 'http://dashboards.rodekruis.nl/auth/azure/callback',
+		redirectURLSSL: 'https://dashboards.rodekruis.nl/auth/azure/callback'
+	},
+	onedrive: {
+		oneDriveBusinessBaseUrl : 'https://rodekruis-my.sharepoint.com/_api/v2.0'
+	},
+	sharepoint : {
+		sharePointSiteBaseUrl : 'https://rodekruis.sharepoint.com/clusterhulpverlening/hulpvoorvluchtelingen/_api/v2.0'
 	},
 	mailer: {
 		from: process.env.MAILER_FROM || 'MAILER_FROM',
