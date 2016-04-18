@@ -9,12 +9,12 @@ var users = require('../../app/controllers/users'),
 module.exports = function(app) {
 
 	app.route('/dashboards/:dashboardId')
-	    .get(users.requiresLogin, dashboards.read)
+	    .get(dashboards.hasAuthorization, dashboards.read)
 		.put(users.requiresLogin, dashboards.hasAuthorization, dashboards.update)
 	    .delete(users.requiresLogin, dashboards.hasAuthorization, dashboards.delete);
 		
 	app.route('/dashboards')
-		.get(users.requiresLogin, dashboards.list)
+		.get(dashboards.list)
 		.post(users.requiresLogin, dashboards.hasCreateAuthorization, dashboards.create);
 
 

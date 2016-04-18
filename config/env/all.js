@@ -16,6 +16,7 @@ module.exports = {
 	assets: {
 		lib: {
 			css: [
+				'public/build/bower/forms-angular/css/forms-angular-with-bs3.css', // in bower.json
 				'public/build/bower/bootstrap/css/bootstrap.min.css', // in bower.json
 				'public/build/custom/bootstrap/css/bootstrap-theme.min.css', // in bower.json
 				'public/build/custom/leaflet/css/leaflet.css', // in bower.json
@@ -23,8 +24,9 @@ module.exports = {
 				'public/build/bower/angular/css/angular-csp.css', // in bower.json
 				'public/build/bower/mdi/css/materialdesignicons.min.css', // in bower.json
 				'public/build/bower/dcjs/css/dc.css', // in bower.json
-				'public/build/custom/dc-leaflet/css/dc-leaflet-legend.min.css', // NOT in bower.json
-				'public/build/bower/materialize/css/materialize.css' // in bower.json
+				'public/build/custom/dc-leaflet/css/dc-leaflet-legend.min.css' // NOT in bower.json
+				//'public/build/bower/materialize/css/materialize.css' // in bower.json
+				
 			],
 			js: [
 
@@ -56,10 +58,12 @@ module.exports = {
 				//'public/build/custom/leaflet-map/js/dc-leaflet.js', // NOT in bower.json
 				'public/build/bower/materialize/js/materialize.js',
 				'public/build/custom/leaflet-stamen/tile.stamen.js', // NOT in bower.json
-				'public/build/custom/angular-dc/js/angular-dc.js'
-				
-				
-				
+				'public/build/custom/angular-dc/js/angular-dc.js', //in bower.json
+				'public/build/custom/forms-angular/js/forms-angular.js', //in bower.json
+				'public/build/bower/angular-messages/js/angular-messages.js', //in bower.json
+				'public/build/bower/ngInfiniteScroll/js/ng-infinite-scroll.js',//in bower.json
+				'public/build/bower/angular-elastic/js/elastic.js', //in bower.json
+				'public/build/bower/underscore/js/underscore.js'//in bower.json
 			]
 		},
 		css: [

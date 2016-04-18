@@ -96,7 +96,14 @@ exports.delete = function(req, res) {
  * List of Dashboards
  */
 exports.list = function(req, res) {
-	Dashboard.find().sort('-created').populate('user', 'displayName').exec(function(err, dashboards) {
+	
+	// If user is not logged in, add criteria for selecting public dashboards only
+	var criteria = '';
+	if (typeof(req.user) === 'undefined') {
+		criteria = { 'isPublic': true} ;
+	}
+	
+	Dashboard.find(criteria).sort('-created').populate('user', 'displayName').exec(function(err, dashboards) {
 		if (err) {
 			return res.send(400, {
 				message: getErrorMessage(err)
@@ -111,9 +118,19 @@ exports.list = function(req, res) {
  * Dashboard middleware
  */
 exports.dashboardByID = function(req, res, next, id) {
-	Dashboard.findById(id).populate('user', 'displayName').exec(function(err, dashboard) {
+	var _id = mongoose.Types.ObjectId(id);
+	
+	// If user is not logged in, add criteria for selecting public dashboards only
+	var criteria = {'_id': _id};
+	if (typeof(req.user) === 'undefined') {
+		criteria = { '_id': _id, 'isPublic': true} ;
+	} else {
+		exports.hasAuthorization(req,res,next);
+	}
+	
+	Dashboard.findOne(criteria).populate('user', 'displayName').exec(function(err, dashboard) {
 		if (err) return next(err);
-		if (!dashboard) return next(new Error('Failed to load dashboard ' + id));
+		if (!dashboard) return res.send(400, { message: 'Failed to load dashboard: ' + id });
 		req.dashboard = dashboard;
 		next();
 	});
@@ -123,13 +140,36 @@ exports.dashboardByID = function(req, res, next, id) {
  * Dashboard authorization middleware
  */
 exports.hasAuthorization = function(req, res, next) {
+	var _this = this;
 	var dashboard = req.dashboard;
-	var user = req.user;
-	if (req.dashboard.user.id !== req.user.id) {
-		return res.send(403, {
-			message: 'User is not authorized'
+
+	//if public, then continue
+	if (dashboard.isPublic){
+		next();
+	}
+	// otherwise check if logged in
+	
+	exports.requiresLogin(req, res, function() {
+		if (_.intersection(req.user.roles, dashboard.roles).length) {
+			return next();
+		} else {
+			return res.status(403).send({
+				message: 'User is not authorized'
+			});
+		}
+	});
+};
+
+/**
+ * Require login routing middleware
+ */
+exports.requiresLogin = function(req, res, next) {
+	if (!req.isAuthenticated()) {
+		return res.status(401).send({
+			message: 'User is not logged in'
 		});
 	}
+
 	next();
 };
 

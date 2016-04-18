@@ -11,7 +11,8 @@ var init = require('./config/init')(),
         secrets = require('./config/secrets'),
         path = require('path'),
         constants = require('constants'),
-        tls = require('tls');
+        tls = require('tls'),
+		compression = require('compression');
         
 
 /**
@@ -24,6 +25,18 @@ var db = mongoose.connect(config.db);
 
 // Init the express application
 var app = require('./config/express')(db);
+
+function shouldCompress(req, res) {
+  if (req.headers['x-no-compression']) {
+    // don't compress responses with this request header
+    return false;
+  }
+
+  // fallback to standard filter function
+  return compression.filter(req, res);
+}
+
+app.use(compression({filter: shouldCompress}));
 
 // print all routers
 /*for (var key in app._router.stack) {
