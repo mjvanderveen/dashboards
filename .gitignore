@@ -15,3 +15,4 @@ config/cert/*.ca
 node_modules
 public/lib/
 public/build/bower/
+data/private/

@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('dashboards')
-	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', 'Dropbox', '$window', '$stateParams', '$http', '$timeout', 'cfpLoadingBar',
-	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, Dropbox, $window, $stateParams, $http, $timeout, cfpLoadingBar) {
-		
+	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'Sources', '$window', '$stateParams', 'cfpLoadingBar',
+	function($scope, $q, Authentication, Dashboards, Sources, $window, $stateParams, cfpLoadingBar) {
+
 		$scope.authentication = Authentication;
 		$scope.dashboard = null;
 		$scope.geom = null;
@@ -41,7 +41,7 @@ angular.module('dashboards')
 					$scope.title = $scope.config.title;
 					
 					// get the data
-					$scope.getData();
+					$scope.getData($stateParams.dashboardId);
 						
 					// create the map chart (NOTE: this has to be done before the ajax call)
 					$scope.mapChartType = 'leafletChoroplethChart';	
@@ -52,31 +52,10 @@ angular.module('dashboards')
 				
 					
 		};  
-		
-		/**
-		* load the data from cartodb
-		*/ 
-		$scope.loadCartoDB = function(id){
+			
+		$scope.loadSources = function(sid){
 			var d = $q.defer();
-		    var result = CartoDB.get({table: id}, function() {
-				d.resolve(result);
-		    });
-		    
-			return d.promise;
-		};
-		
-		$scope.loadGoogleSpreadsheet = function(sid){
-			var d = $q.defer();
-		    var result = GoogleSpreadsheet.query({id: sid}, function() {
-				d.resolve(result);
-		    });
-		    
-			return d.promise;
-		};
-		
-		$scope.loadDropbox = function(f){
-			var d = $q.defer();
-		    var result = Dropbox.query({file: f}, function() {
+		    var result = Sources.get({id: sid}, function() {
 				d.resolve(result);
 		    });
 		    
@@ -87,31 +66,29 @@ angular.module('dashboards')
 		 * get the data from the files as defined in the config.
 		 * load  them with ajax and if both are finished, generate the charts
 		 */
-		$scope.getData = function() {
+		$scope.getData = function(dashboardId) {
 			
+			// start loading bar
+			 $scope.start();
+			  
 			// Get data through $resource query to server, and only get data when all requests have resolved
 			$q.all([
-			   $scope.loadCartoDB( 'Districts' ), // table with geo data that will be put on the choropleth map
-			   $scope.loadCartoDB( 'Ready2Helpers' ),
-			   $scope.loadGoogleSpreadsheet('RodeKruisAfdelingen'),
-			   $scope.loadDropbox('districtsrapportage.csv')
-			   
-			]).then(function(data) {
-			   
-			  var geom = data[0];
-			  var d = [];
-			  d.Ready2Helpers = data[1];
-			  d.Districts = data[0];
-			  d.Rapportage = data[3];
+			   $scope.loadSources(dashboardId)
+			]).then(function(dt) {
 			  
-			  // start loading bar
-			  $scope.start();
-			  
+			  // The resp returns the data in another array, so use index 0
+			  var data = dt[0];	   		  
+			  var d = {};
+			  $scope.geom = data.DistrictsLocal.data;
+			
+			  d.Ready2Helpers = data.Ready2HelpCartoDB.data;
+			  d.Districts = data.DistrictsLocal.data;
+			  d.Rapportage = data.DistrictsRapportage.data;
+			    
 			  $scope.generateCharts(d);
 			  
 			  // end loading bar
-			  $scope.complete();
-			   
+			  $scope.complete();	   
 			});
 		};
 
@@ -129,8 +106,8 @@ angular.module('dashboards')
 		 * data is loaded from the data set
 		 * geom is geojson file
 		 */
-		$scope.generateCharts = function (data){
-			
+		$scope.generateCharts = function (d){
+				
 			var districtChart = dc.rowChart('#row-chart');
 			//var districtChart2 = dc.rowChart('#row-chart2');
 			//var compositeChart = dc.compositeChart('#composite-chart');
@@ -155,8 +132,9 @@ angular.module('dashboards')
 			 * tell crossfilter that  data is just a set of keys
 			 * and then define your dimension and group functions to actually do the table lookup.
 			 */
+
 			//var cf = crossfilter(d3.range(0, data.Districts.features.length));
-			var cf = crossfilter(d3.range(0, data.Rapportage.length));
+			var cf = crossfilter(d3.range(0, d.Rapportage.length));
 		
 			// The wheredimension returns the unique identifier of the geo area
 			var whereDimension = cf.dimension(function(i) { return d.Rapportage[i].DistrictNummer; });
@@ -249,7 +227,7 @@ angular.module('dashboards')
 				group: whereGroupSum,//Count,
 				center: [0,0],
 				zoom: 0,
-				geojson: data.Districts, // this requires the full geojson object
+				geojson: d.Districts, // this requires the full geojson object
 				featureOptions: {
 									'fillColor': 'white',
 									'color': 'gray',
@@ -732,7 +710,7 @@ angular.module('dashboards')
 				.group(whereGroupSum)//Count)
 				.center([0,0])
 				.zoom(0)    
-				.geojson(data.Districts) //geom)
+				.geojson(d.Districts) //geom)
 				.colors(['#CCCCCC', $scope.config.color])
 				.colorDomain([0, 1])
 				.colorAccessor(function (d) {

@@ -7,6 +7,6 @@ angular.module('dashboards').run(['Menus', 'gettextCatalog',
 		var title = gettextCatalog.getString('Dashboards');
 		
 		// Set top bar menu items
-		Menus.addMenuItem('topbar', title, 'dashboards');
+		Menus.addMenuItem('topbar', title, 'dashboards', '/dashboards', true);
 	}
 ]);
