@@ -1,13 +1,8 @@
 'use strict';
 
-<<<<<<< HEAD
 angular.module('dashboards')
-	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', '$window', '$stateParams', '$http', '$timeout', 'cfpLoadingBar',
-	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, $window, $stateParams, $http, $timeout, cfpLoadingBar) {
-=======
-angular.module('dashboards').controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', 'Dropbox', '$window', '$stateParams',
-	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, Dropbox, $window, $stateParams) {
->>>>>>> 0af5c793eaa83d76aaaa7ee353e857521e165307
+	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'CartoDB', 'GoogleSpreadsheet', 'Dropbox', '$window', '$stateParams', '$http', '$timeout', 'cfpLoadingBar',
+	function($scope, $q, Authentication, Dashboards, CartoDB, GoogleSpreadsheet, Dropbox, $window, $stateParams, $http, $timeout, cfpLoadingBar) {
 		
 		$scope.authentication = Authentication;
 		$scope.dashboard = null;
@@ -98,7 +93,7 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			   $scope.loadCartoDB( 'Districts' ), // table with geo data that will be put on the choropleth map
 			   $scope.loadCartoDB( 'Ready2Helpers' ),
 			   $scope.loadGoogleSpreadsheet('RodeKruisAfdelingen'),
-			   $scope.loadDropbox('ready2helpers.csv')
+			   $scope.loadDropbox('districtsrapportage.csv')
 			   
 			]).then(function(data) {
 			   
@@ -106,11 +101,14 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			  var d = [];
 			  d.Ready2Helpers = data[1];
 			  d.Districts = data[0];
+			  d.Rapportage = data[3];
 			  
+			  // start loading bar
 			  $scope.start();
 			  
 			  $scope.generateCharts(d);
 			  
+			  // end loading bar
 			  $scope.complete();
 			   
 			});
@@ -133,7 +131,8 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 		$scope.generateCharts = function (data){
 			
 			var districtChart = dc.rowChart('#row-chart');
-			var firstLetterChart = dc.pieChart('#fl-chart');
+			var districtChart2 = dc.rowChart('#row-chart2');
+			//var compositeChart = dc.compositeChart('#composite-chart');
 			var mapChart = dc.leafletChoroplethChart('#map-chart');
 			
 			// Set geom
@@ -143,6 +142,8 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			var d = [];
 			d.Districts = data.Districts.features;
 			d.Ready2Helpers = data.Ready2Helpers.rows;
+			d.Rapportage = data.Rapportage;
+			console.log(d);
 			
 			// get the lookup table
 			var lookup = $scope.genLookup();
@@ -152,33 +153,86 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 			 * tell crossfilter that  data is just a set of keys
 			 * and then define your dimension and group functions to actually do the table lookup.
 			 */
-			var cf = crossfilter(d3.range(0, data.Districts.features.length));
+			//var cf = crossfilter(d3.range(0, data.Districts.features.length));
+			var cf = crossfilter(d3.range(0, data.Rapportage.length));
 		
 			// The wheredimension returns the unique identifier of the geo area
-			var whereDimension = cf.dimension(function(i) { return d.Districts[i].properties.id; });
-			//var whereDimension2 = cf.dimension(function(i) { return d.Ready2Helpers[i].district; });
-			var whereDimensionFL = cf.dimension(function(i) {
-					return d.Districts[i].properties.district.substr(0,1);
-				});
+			var whereDimension = cf.dimension(function(i) { return d.Rapportage[i].DistrictNummer; });
+			var districtDimension = cf.dimension(function(i) { return d.Rapportage[i].DistrictNummer; });
+			var testDimension = cf.dimension(function(i) { return d.Rapportage[i].COMBestuur; });
 			
+			//var whereDimensionFL = cf.dimension(function(i) {
+			//		return d.Districts[i].properties.district.substr(0,1);
+			//	});
 			
-			//var whereGroupCount = whereDimension.group();
-			var whereGroupSum = whereDimension.group().reduceSum(function(i) { return d.Ready2Helpers[i].number;});
-			var whereGroupSumFL = whereDimensionFL.group().reduceSum(function(i) { return d.Ready2Helpers[i].number;});
+					
+			var whereGroupSum = whereDimension.group().reduceSum(function(i) { return d.Rapportage[i].R2HaantalActief;});
+			var districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].R2HaantalActief;});
+			var districtGroupSum2 = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].ALGaantalinwoners;});
+			//var districtGroup = districtDimension.group().reduce(function(i) { return reduceFieldsAdd(d.Rapportage[i].fields), reduceFieldsRemove(d.Rapportage[i].fields), reduceFieldsInitial(d.Rapportage[i].fields));
+			var testGroupCount = testDimension.group();
+			//var whereGroupSumFL = whereDimensionFL.group().reduceSum(function(i) { return d.Rapportage[i].R2HaantalActief;});
 			
-			// Additional dimension return any value required
-			//var ready2HelpersDimension = cf.dimension(function(i) {	return d.Ready2Helpers[i].number; });	
-			
-    		// create the groups
-			//var ready2HelpersGroup = ready2HelpersDimension.group();
-			//var whereGroup = whereDimension.group();
-			//var whereGroup = whereDimension.group(function(i) {return d.Ready2Helpers[i].number;});
-			//var whereGroupSum = ready2HelpersDimension.group().reduceSum(function(i) {return d.Ready2helpers[i].number;});
-			
-			//Edit Jannis
-			//var districtDimension = cf.dimension(function(i) { return d.Ready2Helpers[i].district;});
-			//var districtGroup = districtDimension.group().reduceSum(function(i) { return d.Ready2Helpers[i].number;});
-			
+			//Create all data for data-tables
+			var totaalDim = cf.dimension(function(i) { return 'Totaal'; });
+
+			var TotaalaantalVWGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].TotaalaantalVW;});
+			var VWinstroomGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].VWinstroom;});
+			var VWuitstroomGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].VWuitstroom;});
+			var LeeftijdOnbekendGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].LeeftijdOnbekend;});
+			var LeeftijdOnder18Group = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].LeeftijdOnder18;});
+			// var LeeftijdOnder18Group = totaalDim.group().reduce(
+														// function reduceAdd(p, v) {
+															// p.sumOfSub += v.Rapportage[i].LeeftijdOnder18;
+															// console.log(p.sumOfSub);
+															// p.sumOfTotal += v.TotaalaantalVW;
+															// p.finalVal = p.sumOfSub / p.sumOfTotal;
+															// return p;
+														// },
+														// function reduceRemove(p, v) {
+															// p.sumOfSub -= v.LeeftijdOnder18;
+															// p.sumOfTotal -= v.TotaalaantalVW;
+															// p.finalVal = p.sumOfSub / p.sumOfTotal;
+															// return p;
+														// },
+														// function reduceInitial() {
+															// return { sumOfSub:0, sumOfTotal:0, finalVal:0 };
+													   // });
+			var Leeftijd18tot30Group = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].Leeftijd18tot30;});
+			var Leeftijd30tot50Group = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].Leeftijd30tot50;});
+			var Leeftijd50tot65Group = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].Leeftijd50tot65;});
+			var Leeftijd65tot85Group = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].Leeftijd65tot85;});
+			var LeeftijdOnder85Group = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].LeeftijdOnder85;});
+			var GeslachtManGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].GeslachtMan;});
+			var GeslachtVrouwGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].GeslachtVrouw;});
+			var GeslachtOnbekendGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].GeslachtOnbekend;});
+			var ALGaantalinwonersGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].ALGaantalinwoners;});
+			var ALGaantalgemeentenGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].ALGaantalgemeenten;});
+			var R2HaantalActiefGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].R2HaantalActief;});
+			var ALGaantalbestuursledenGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].ALGaantalbestuursleden;});
+			var NHTotaalGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHTotaal;});
+			var NHBZOGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHBZO;});
+			var NHEVHGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHEVH;});
+			var NHNHTGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHNHT;});
+			var NHOverigGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHOverig;});
+			var NHOverlapGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHOverlap;});
+			var NHBestuurGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHBestuur;});
+			var NHCoordinatorGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].NHCoordinator;});
+			var COMTotaalGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].COMTotaal;});
+			var COMBestuurGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].COMBestuur;});
+			var COMCoordinatorGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].COMCoordinator;});
+			var FWTotaalGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].FWTotaal;});
+			var FWBestuurGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].FWBestuur;});
+			var FWCoordinatorGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].FWCoordinator;});
+			var RHTotaalGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].RHTotaal;});
+			var RHBestuurGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].RHBestuur;});
+			var RHCoordinatorGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].RHCoordinator;});
+			var ZELFTotaalGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].ZELFTotaal;});
+			var ZELFBestuurGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].ZELFBestuur;});
+			var ZELFCoordinatorGroup = totaalDim.group().reduceSum(function(i) {return d.Rapportage[i].ZELFCoordinator;});
+
+
+
 			// group with all
 			var all = cf.groupAll();
 
@@ -220,40 +274,295 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 				renderPopup: true
 				
 			};
+			
+			var numberFormat = d3.format(',');
 				
+			// create the data tables
+			// ALGEMEEN
+			dc.dataTable('#data-table2')
+						.dimension(ALGaantalinwonersGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal inwoners';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table3')
+						.dimension(ALGaantalgemeentenGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal gemeenten';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			
+			// VRIJWILLIGERSMANAGEMENT			
+			dc.dataTable('#data-table4')
+						.dimension(TotaalaantalVWGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal vrijwilligers';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table5')
+						.dimension(R2HaantalActiefGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal Ready2Helpers';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table6')
+						.dimension(ALGaantalbestuursledenGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal bestuursleden';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table7')
+						.dimension(GeslachtManGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Mannen';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table8')
+						.dimension(GeslachtVrouwGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Vrouwen';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table9')
+						.dimension(LeeftijdOnder18Group)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Leeftijd: <18';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table10')
+						.dimension(Leeftijd18tot30Group)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Leeftijd: 18-30';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table11')
+						.dimension(Leeftijd30tot50Group)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Leeftijd: 30-50';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table12')
+						.dimension(Leeftijd50tot65Group)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Leeftijd: 50-65';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			dc.dataTable('#data-table13')
+						.dimension(Leeftijd65tot85Group)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Leeftijd: 65-85';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;
+			
+			// NOODHULP			
+			dc.dataTable('#data-table14')
+						.dimension(NHBestuurGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal bestuursleden';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;			
+			dc.dataTable('#data-table15')
+						.dimension(NHCoordinatorGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal coördinatoren';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;				
+			dc.dataTable('#data-table16')
+						.dimension(NHTotaalGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal vrijwilligers totaal';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;				
+			dc.dataTable('#data-table17')
+						.dimension(NHBZOGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal vrijwilligers BZO';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;				
+			dc.dataTable('#data-table18')
+						.dimension(NHEVHGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal vrijwilligers EVH';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;				
+			dc.dataTable('#data-table19')
+						.dimension(NHNHTGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal vrijwilligers NHT';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;				
+			dc.dataTable('#data-table20')
+						.dimension(NHOverigGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal vrijwilligers Overig';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;				
+			dc.dataTable('#data-table21')
+						.dimension(NHOverlapGroup)                
+						.group(function (i) {return ''; })
+						.width(200)
+						.columns([function(d){return 'Aantal overlap';}, function(d){return numberFormat(d.value);}])
+						.order(d3.descending)
+						;				
+						
+						
 			// create the data table
 			dc.dataTable('#data-table')
 						.dimension(whereDimension)                
 						.group(function (i) {
-							return ''; //ready2HelpersDimension[i];
+							return ''; 
 						})
 						.size(650)
 						.columns([
 							function(i){
-							   return d.Districts[i].properties.district; 
+							   return lookup[d.Rapportage[i].DistrictNummer]; 
 							},
 							function(i){
-							   return d.Ready2Helpers[i].number;
+							   return d.Rapportage[i].R2HaantalActief;
 							}
 						])
 						.order(d3.descending)
 						.sortBy(function (i) {
-							  return d.Ready2Helpers[i].number; //d.Districts[i].properties.district;
+							  return d.Rapportage[i].R2HaantalActief; //d.Districts[i].properties.district;
 						});
 
 		
 			// we need this becuase we used d3 to load the data and we are outside the angular space
             //$scope.$apply();
-			
+			/*
+			dc.compositeChart('#composite-chart')
+				.width(600)
+				.height(500)
+				.margins({top: 0, left: 10, right: 50, bottom: 20})
+				.dimension(districtDimension)
+				.compose([
+					dc.rowChart('#chart')
+						.group(districtGroupSum)
+						.colors(['#CCCCCC', $scope.config.color])
+						.colorDomain([0, 1])
+						.colorAccessor(function (d) {
+							if(d.value > 0){
+								return 1;
+							} else {
+								return 0;
+							}
+						})           
+						.ordering(function(d) { return -d.value; })
+						.label(function (d) { return lookup[d.key]; })
+						.title(function (d) { return numberFormat(d.value); })
+					,dc.rowChart('#chart')
+						.group(districtGroupSum2)
+						.colors(['#CCCCCC', $scope.config.color])
+						.colorDomain([0, 1])
+						.colorAccessor(function (d) {
+							if(d.value > 0){
+								return 1;
+							} else {
+								return 0;
+							}
+						})           
+						.ordering(function(d) { return -d.value; })
+						.label(function (d) { return lookup[d.key]; })
+						.title(function (d) { return numberFormat(d.value); })
+				])
+				//.group(districtGroupSum)
+				//.stack(districtGroupSum2)
+				//.renderLabel(true)
+				//.renderTitleLabel(true)
+				//.titleLabelOffsetX(-30)
+				//.elasticX(true)
+				//.xAxis().ticks(4)
+				;
+			*/	
+			districtChart
+				.width(300)
+				.height(500)
+				.margins({top: 0, left: 10, right: 50, bottom: 20})
+				.dimension(districtDimension)
+				.group(districtGroupSum)
+				//.stack(districtGroupSum2)
+				.colors(['#CCCCCC', $scope.config.color])
+				.colorDomain([0, 1])
+				.colorAccessor(function (d) {
+					if(d.value > 0){
+						return 1;
+					} else {
+						return 0;
+					}
+				})           
+				.ordering(function(d) { return -d.value; })
+				.label(function (d) { return lookup[d.key]; })
+				.title(function (d) { return numberFormat(d.value); })
+				.renderLabel(true)
+				.renderTitleLabel(true)
+				.titleLabelOffsetX(-30)
+				.elasticX(true)
+				.xAxis().ticks(4)
+				;
+				
+			districtChart2
+				.width(300)
+				.height(500)
+				.margins({top: 0, left: 10, right: 50, bottom: 20})
+				.dimension(districtDimension)
+				.group(districtGroupSum2)
+				.colors(['#CCCCCC', $scope.config.color])
+				.colorDomain([0, 1])
+				.colorAccessor(function (d) {
+					if(d.value > 0){
+						return 1;
+					} else {
+						return 0;
+					}
+				})           
+				.ordering(function(d) { return -d.value; })
+				.label(function (d) { return lookup[d.key]; })
+				.title(function (d) { return numberFormat(d.value); })
+				//.renderLabel(true)
+				.renderTitleLabel(true)
+				.titleLabelOffsetX(-50)
+				.elasticX(true)
+				.xAxis().ticks(4)
+				;
+			/*	
 			districtChart
 				.width(600)
 				.height(500)
 				.margins({top: 0, left: 10, right: 50, bottom: 20})
-				.dimension(whereDimension)
-				.group(whereGroupSum)
-				.colors(d3.scale.ordinal().range(['#0080ff']))
+				.dimension(testDimension)
+				.group(testGroupCount)
+				//.data(function(group) { return group.top(15);})
+				.colors(['#CCCCCC', $scope.config.color])
+				.colorDomain([0, 1])
+				.colorAccessor(function (d) {
+					if(d.value > 0){
+						return 1;
+					} else {
+						return 0;
+					}
+				})           
+				//.colors(d3.scale.ordinal().range(['#0080ff']))
 				.ordering(function(d) { return -d.value; })
-				.label(function (d) { return lookup[d.key]; })
+				.label(function (d) { return d.key ; })
 				.title(function (d) { return d.value; })
 				.renderLabel(true)
 				//.labelOffsetX(10)
@@ -264,7 +573,8 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 				//.xAxis(xAxis) //.ticks(4)
 				//.turnOnControls(true)
 				;
-			
+			*/
+			/*
 			firstLetterChart
 				.width(600)
 				.height(300)
@@ -287,7 +597,7 @@ angular.module('dashboards').controller('DistrictDashboardsController', ['$scope
 				//.xAxis(xAxis) //.ticks(4)
 				//.turnOnControls(true)
 				;
-				
+			*/	
 			mapChart
 				.width($('#map-chart').width())
 				.height(360)
