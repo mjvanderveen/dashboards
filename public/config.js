@@ -4,7 +4,7 @@
 var ApplicationConfiguration = (function() {
 	// Init module configuration options
 	var applicationModuleName = 'Nederlandse Rode Kruis Dashboards';
-	var applicationModuleVendorDependencies = ['ngResource', 'ngRoute', 'ngCookies', 'ngTouch', 'ngSanitize', 'ui.router', 'ui.bootstrap', /*'ui.utils'*/, 'leaflet-directive', /*'angular-centered'*/, /*'akoenig.deckgrid',*/ /*'ui.sortable'*/, 'angular-lodash', 'gettext', /*'ui-iconpicker'*/, 'AngularDc', 'formsAngular'];
+	var applicationModuleVendorDependencies = ['ngResource', 'ngRoute', 'ngCookies', 'ngTouch', 'ngSanitize', 'ui.router', 'ui.bootstrap', /*'ui.utils'*/, 'leaflet-directive', /*'angular-centered'*/, /*'akoenig.deckgrid',*/ /*'ui.sortable'*/, 'angular-lodash', 'gettext', /*'ui-iconpicker'*/, 'AngularDc', 'formsAngular', ,'angular-loading-bar'];
 
 	// Add a new vertical module
 	var registerModule = function(moduleName) {

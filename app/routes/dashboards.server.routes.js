@@ -9,7 +9,7 @@ var users = require('../../app/controllers/users'),
 module.exports = function(app) {
 
 	app.route('/dashboards/:dashboardId')
-	    .get(dashboards.hasAuthorization, dashboards.read)
+	    .get(dashboards.read)
 		.put(users.requiresLogin, dashboards.hasAuthorization, dashboards.update)
 	    .delete(users.requiresLogin, dashboards.hasAuthorization, dashboards.delete);
 		

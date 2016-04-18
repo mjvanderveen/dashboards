@@ -24,8 +24,9 @@ module.exports = {
 				'public/build/bower/angular/css/angular-csp.css', // in bower.json
 				'public/build/bower/mdi/css/materialdesignicons.min.css', // in bower.json
 				'public/build/bower/dcjs/css/dc.css', // in bower.json
-				'public/build/custom/dc-leaflet/css/dc-leaflet-legend.min.css' // NOT in bower.json
-				//'public/build/bower/materialize/css/materialize.css' // in bower.json
+				'public/build/custom/dc-leaflet/css/dc-leaflet-legend.min.css', // NOT in bower.json
+				//'public/build/bower/materialize/css/materialize.css', // in bower.json
+				'public/build/bower/angular-loading-bar/css/loading-bar.css' // in bower.json
 				
 			],
 			js: [
@@ -63,7 +64,8 @@ module.exports = {
 				'public/build/bower/angular-messages/js/angular-messages.js', //in bower.json
 				'public/build/bower/ngInfiniteScroll/js/ng-infinite-scroll.js',//in bower.json
 				'public/build/bower/angular-elastic/js/elastic.js', //in bower.json
-				'public/build/bower/underscore/js/underscore.js'//in bower.json
+				'public/build/bower/underscore/js/underscore.js',//in bower.json
+				'public/build/bower/angular-loading-bar/js/loading-bar.js'
 			]
 		},
 		css: [
