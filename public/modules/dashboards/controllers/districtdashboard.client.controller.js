@@ -113,17 +113,7 @@ angular.module('dashboards')
 			//var compositeChart = dc.compositeChart('#composite-chart');
 			var mapChart = dc.leafletChoroplethChart('#map-chart');
 			//var $scope.metric = 'R2HaantalActief';
-			
-			// Set geom
-			$scope.geom = data.Districts;	
-			
-			// simplify objects for easier access
-			var d = [];
-			d.Districts = data.Districts.features;
-			d.Ready2Helpers = data.Ready2Helpers.rows;
-			d.Rapportage = data.Rapportage;
-			console.log(d);
-			
+					
 			// get the lookup table
 			var lookup = $scope.genLookup();
 			

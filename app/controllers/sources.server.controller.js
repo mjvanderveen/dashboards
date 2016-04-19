@@ -20,7 +20,6 @@ var GoogleSpreadsheet = require('google-spreadsheet'),
 	
 	// set vars
     var local_result = [];
-	var converter = new Converter({delimiter: ',', eol: '\n'});
 
 exports.getSources = function(req, res, next){
 	// get dashboard id from request parameters
@@ -220,9 +219,11 @@ exports.getDropbox = function(source){
 					return cb(true, source);
 				}
 			
+				var converter = new Converter({delimiter: ',', eol: '\n'});
 				converter.fromString(data, function(err,result){
 					if (err){
 						source.error = err;
+						console.log(source.error);
 						return cb(true, source);
 					}
 					else {
@@ -318,6 +319,7 @@ exports.getFileUrl = function(source){
 						source.data = body;
 					} else {
 						
+						var converter = new Converter({delimiter: ',', eol: '\n'});
 						converter.fromString(body, function(err,result){
 							if (err){
 								source.error = err;
