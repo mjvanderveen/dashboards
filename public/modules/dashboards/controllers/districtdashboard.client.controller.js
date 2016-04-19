@@ -7,6 +7,7 @@ angular.module('dashboards')
 		$scope.authentication = Authentication;
 		$scope.dashboard = null;
 		$scope.geom = null;
+		$scope.metric = 'R2HaantalActief';
 
 		$scope.config =  {
 							whereFieldName:'districtcode',
@@ -108,10 +109,21 @@ angular.module('dashboards')
 		$scope.generateCharts = function (d){
 				
 			var districtChart = dc.rowChart('#row-chart');
-			var districtChart2 = dc.rowChart('#row-chart2');
+			//var districtChart2 = dc.rowChart('#row-chart2');
 			//var compositeChart = dc.compositeChart('#composite-chart');
 			var mapChart = dc.leafletChoroplethChart('#map-chart');
-						
+			//var $scope.metric = 'R2HaantalActief';
+			
+			// Set geom
+			$scope.geom = data.Districts;	
+			
+			// simplify objects for easier access
+			var d = [];
+			d.Districts = data.Districts.features;
+			d.Ready2Helpers = data.Ready2Helpers.rows;
+			d.Rapportage = data.Rapportage;
+			console.log(d);
+			
 			// get the lookup table
 			var lookup = $scope.genLookup();
 			
@@ -413,7 +425,8 @@ angular.module('dashboards')
 							  return d.Rapportage[i].R2HaantalActief; //d.Districts[i].properties.district;
 						});
 
-		
+			
+			
 			// we need this becuase we used d3 to load the data and we are outside the angular space
             //$scope.$apply();
 			/*
@@ -462,7 +475,7 @@ angular.module('dashboards')
 				;
 			*/	
 			districtChart
-				.width(300)
+				.width(600)
 				.height(500)
 				.margins({top: 0, left: 10, right: 50, bottom: 20})
 				.dimension(districtDimension)
@@ -486,7 +499,131 @@ angular.module('dashboards')
 				.elasticX(true)
 				.xAxis().ticks(4)
 				;
-				
+
+				$('#data-table2').on('click', function() {
+				  $scope.metric = 'ALGaantalinwoners';	
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].ALGaantalinwoners;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table3').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].ALGaantalgemeenten;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table4').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].TotaalaantalVW;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table5').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].R2HaantalActief;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table6').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].ALGaantalbestuursleden;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table7').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].GeslachtMan;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table8').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].GeslachtVrouw;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table9').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].LeeftijdOnder18;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table10').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].Leeftijd18tot30;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table11').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].Leeftijd30tot50;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table12').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].Leeftijd50tot65;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table13').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].Leeftijd65tot85;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table14').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHBestuur;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table15').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHCoordinator;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table16').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHTotaal;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table17').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHBZO;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table18').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHEVH;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table19').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHNHT;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table20').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHOverig;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+				$('#data-table21').on('click', function() {
+				  districtGroupSum.dispose();
+				  districtGroupSum = districtDimension.group().reduceSum(function(i) { return d.Rapportage[i].NHOverlap;});	
+				  districtChart.group(districtGroupSum);
+				  districtChart.redraw();
+				});
+
+			
+/*			
 			districtChart2
 				.width(300)
 				.height(500)
@@ -511,7 +648,7 @@ angular.module('dashboards')
 				.elasticX(true)
 				.xAxis().ticks(4)
 				;
-			/*	
+*/			/*	
 			districtChart
 				.width(600)
 				.height(500)
