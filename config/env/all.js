@@ -57,12 +57,12 @@ module.exports = {
 				'public/build/bower/dcjs/js/dc.js', //in bower.json
 				'public/build/custom/dc-leaflet/js/dc-leaflet-dev.js', // NOT in bower.json
 				//'public/build/custom/leaflet-map/js/dc-leaflet.js', // NOT in bower.json
-				'public/build/bower/materialize/js/materialize.js',
+				//'public/build/bower/materialize/js/materialize.js',
 				'public/build/custom/leaflet-stamen/tile.stamen.js', // NOT in bower.json
 				'public/build/custom/angular-dc/js/angular-dc.js', //in bower.json
 				'public/build/custom/forms-angular/js/forms-angular.js', //in bower.json
 				'public/build/bower/angular-messages/js/angular-messages.js', //in bower.json
-				'public/lib/ngInfiniteScroll/build/ng-infinite-scroll.js',//in bower.json
+				'public/build/bower/ngInfiniteScroll/js/ng-infinite-scroll.js',//in bower.json
 				'public/build/bower/angular-elastic/js/elastic.js', //in bower.json
 				'public/build/bower/underscore/js/underscore.js',//in bower.json
 				'public/build/bower/angular-loading-bar/js/loading-bar.js'

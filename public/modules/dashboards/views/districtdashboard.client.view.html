@@ -16,120 +16,118 @@
 				</div>                    
 			</div>
 			<div class="row">
-				<div class="col-md-4 colheight">
-					<div class="col-xs-12 removepadding">
-						<b>Rode Kruis districten in Nederland</b>
-						<div id="map-chart" style="width:300px; height:480px;"></div>						
+		
+				<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
+				  <!-- Indicators -->
+				  <ol class="carousel-indicators">
+					<li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+					<li data-target="#myCarousel" data-slide-to="1"></li>
+					<li data-target="#myCarousel" data-slide-to="2"></li>
+					<li data-target="#myCarousel" data-slide-to="3"></li>
+				  </ol>
+
+				  <!-- Wrapper for slides -->
+				  <div class="carousel-inner" role="listbox">
+					<div class="item active">
+						<div class="col-md-4 colheight">
+							<div class="col-xs-12 removepadding">
+								<b>Rode Kruis districten in Nederland</b>
+								<div id="map-chart" style="width:300px; height:480px;"></div>						
+							</div>
+						</div>
+						<div class="col-md-4 colheight">
+							<div class="col-xs-12 removepadding" id="row-chart">
+								<b><span>{{metric}}</span> per district</b>
+							</div>                  
+						</div>
+					  <div class="carousel-caption">
+						<h3>Algemeen</h3>
+					  </div>
 					</div>
-					<!--
-					<div class="col-xs-12 removepadding">
-						<dc-chart id="where-chart"
-							chart="mapChart"
-							type="mapChartType"
-							options="mapChartOptions"
-							style="display:block; width:300px; height:300px;">
-						</dc-chart> 
+					
+					<div class="item">
+						<table style="align: right" class="table-condensed table-hover" id="data-table2" metric="ALGaantalinwoners">
+						</table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table3"></table>
+											  
+					  <div class="carousel-caption">
+						<h3>Algemeen</h3>
+					  </div>
 					</div>
-					-->
-				</div>
-				<!--
-				<div class="col-md-4 colheight">
-					<div class="col-xs-6 removepadding">
+					
+					<div class="item">
+						<table style="align: right" class="table-condensed table-hover" id="data-table4"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table5"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table6"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table7"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table8"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table9"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table10"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table11"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table12"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table13"></table>
+					  
+					  <div class="carousel-caption">
+						<h3>Vrijwilligersmanagement</h3>
+					  </div>
 					</div>
-				</div>
-				<div class="col-md-4 colheight">
-					<div class="col-xs-12 removepadding" id="composite-chart">
-						<b>Aantal Ready2Helpers per district</b>
-					</div>                  
-				</div>
-				-->
-				<div class="col-md-4 colheight">
-					<div class="col-xs-12 removepadding" id="row-chart">
-						<b><span>{{metric}}</span> per district</b>
-					</div>                  
-				</div>
-				<!--
-				<div class="col-md-4 colheight">
-					<div class="col-xs-12 removepadding" id="row-chart2">
-						<b>Aantal inwoners per district</b>
-					</div>                  
-				</div>
-				-->
-			</div> 
-			<br><br><br><hr>
-			<!--
-			<div class="row">
-				<div class="col-md-4 colheight">
-					<div class="col-xs-12 removepadding" id="fl-chart">
-						<b>Aantal helpers per 1e letter van district</b>
-					</div>                  
-				</div>
-			</div> 
-			-->
-			<div class="row">
-				<div class="col-md-4">
-					<b>Algemeen</b>
-					<table style="align: right" class="table-condensed table-hover" id="data-table2" metric="ALGaantalinwoners">
-					<!--
-					  <thead>
-						<tr class="header" id="tabletip">
-						  <th>Metric</th>
-						  <th>Value</th>                  
-						</tr>
-					  </thead>
-					  <tbody>
-						<tr id="data-table2"></tr>
-						<tr id="data-table3"></tr>
-					  </tbody>
-					-->
-					</table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table3"></table>
-					<hr>
-					<b>Vrijwilligersmanagement</b>
-					<table style="align: right" class="table-condensed table-hover" id="data-table4"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table5"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table6"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table7"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table8"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table9"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table10"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table11"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table12"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table13"></table>
-				</div>
-				
-				<div class="col-md-4">
-					<b>Noodhulp</b>
-					<table style="align: right" class="table-condensed table-hover" id="data-table14"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table15"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table16"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table17"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table18"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table19"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table20"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table21"></table>
-					<hr>
-					<b>Evementenhulpverlening</b>
-				</div>
-				
-				<div class="col-md-4">
-					<b>Noodhulp</b>
-					<table style="align: right" class="table-condensed table-hover" id="data-table14"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table15"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table16"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table17"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table18"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table19"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table20"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table21"></table>
-					<hr>
-					<b>...</b>
-					<table style="align: right" class="table-condensed table-hover" id="data-table22"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table23"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table24"></table>
-					<table style="align: right" class="table-condensed table-hover" id="data-table25"></table>
+
+					<div class="item">
+					  <b>Noodhulp</b>
+						<table style="align: right" class="table-condensed table-hover" id="data-table14"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table15"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table16"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table17"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table18"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table19"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table20"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table21"></table>
+
+					  <div class="carousel-caption">
+						<h3>Noodhulp</h3>
+					  </div>
+					</div>
+
+					<div class="item">
+					    <table style="align: right" class="table-condensed table-hover" id="data-table14"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table15"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table16"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table17"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table18"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table19"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table20"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table21"></table>
+					  <div class="carousel-caption">
+						<h3>Noodhulp</h3>
+					  </div>
+					</div>
+
+					<div class="item">
+					    <table style="align: right" class="table-condensed table-hover" id="data-table22"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table23"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table24"></table>
+						<table style="align: right" class="table-condensed table-hover" id="data-table25"></table>
+
+					  <div class="carousel-caption">
+						<h3>Noodhulp</h3>
+					  </div>
+					</div>
+				  </div>
+
+				  <!-- Left and right controls -->
+				  <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev" ng-non-bindable>
+					<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+					<span class="sr-only">Previous</span>
+				  </a>
+				  <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next" ng-non-bindable>
+					<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+					<span class="sr-only">Next</span>
+				  </a>
 				</div>
 			</div>
+
+
+
 			<!--
 			<div class="row">
 				<div class="col-md-12">

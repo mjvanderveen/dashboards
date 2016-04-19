@@ -11,8 +11,8 @@ angular.module('dashboards')
 
 		$scope.config =  {
 							whereFieldName:'districtcode',
-							joinAttribute:'id',
-							nameAttribute:'district',
+							joinAttribute:'tdn_code',
+							nameAttribute:'naam',
 							color:'#0080ff'
 						};	
 		
