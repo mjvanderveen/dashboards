@@ -17,7 +17,10 @@ var GoogleSpreadsheet = require('google-spreadsheet'),
 	fs = require('fs'),
 	request =   require('request'),
 	_ = require('lodash');
+	
+	// set vars
     var local_result = [];
+	var converter = new Converter({delimiter: ',', eol: '\n'});
 
 exports.getSources = function(req, res, next){
 	// get dashboard id from request parameters
@@ -62,54 +65,59 @@ exports.getSources = function(req, res, next){
 			
 			cb();
 	   },
+	   // per souce use a different function to get the data
 	   function getAllSources(cb) {
 			var tasks = [];
 
 			// So first loop through the array so that I can create
 			// a task/function to handle each object in the array
-			dashboard.sources.forEach(function(source, index) {
-			
-			// before pushing the function into the task array
-			// wrap the push in an IIFE function, passing in the hero 
-			// parameter
+			dashboard.DropboxSources.forEach(function(source, index) {
 			(function(source) {
-			  // now that the hero parameter no  
-			  // longer bound to the inital forEach
-			  // you can push in your function referencing
-			  // the object
-			  if(source.isActive){
-				  switch (source.type) {
-					  case 'Google Spreadsheet':
-							// use the file identifier to the spreadsheet
-							tasks.push(exports.getGoogleSpreadSheet(source));
-							break;
-					  case 'Dropbox':
-							// the file identifier should include an extentions
-							tasks.push(exports.getDropbox(source));
-							break;
-					  case 'CartoDB':
-							// in this case we use the query as defined in the sources object
-							tasks.push(exports.getCartoDB(source));
-							break;
-					  case 'FileLocal':
-							tasks.push(exports.getFileLocal(source));
-							break;
-					  case 'FileUrl':
-							tasks.push(exports.getFileUrl(source));
-							break;
-				  }
-			  }
-			  
-			})(source);
+				  if(source.isActive){
+						tasks.push(exports.getDropbox(source));
+				  }				  
+				})(source);
 			});
-
+			
+			dashboard.GoogleSpreadsheetSources.forEach(function(source, index) {
+			(function(source) {
+				  if(source.isActive){
+						tasks.push(exports.getGoogleSpreadSheet(source));
+				  }				  
+				})(source);
+			});
+			
+			dashboard.FileLocalSources.forEach(function(source, index) {
+			(function(source) {
+				  if(source.isActive){
+						tasks.push(exports.getFileLocal(source));
+				  }				  
+				})(source);
+			});
+			
+			dashboard.FileUrlSources.forEach(function(source, index) {
+			(function(source) {
+				  if(source.isActive){
+						tasks.push(exports.getFileUrl(source));
+				  }				  
+				})(source);
+			});
+			
+			dashboard.CartoDBSources.forEach(function(source, index) {
+			(function(source) {
+				  if(source.isActive){
+						tasks.push(exports.getCartoDB(source));
+				  }				  
+				})(source);
+			});
+			
+			// perform all tasks in parallel
 			async.parallel(tasks, function(err, sourceArr) {
 				if(err) return next(err);
 				
-				// simplify result to send back to client
+				// simplify sources to send back to client
 				var result = {};
 				sourceArr.forEach(function(source){
-					//result[source.fileId] = source.data;
 					result[source.sourceId] = {name: source.name, data: source.data, public: source.isPublic};
 				});
 				return res.jsonp(result);
@@ -121,10 +129,9 @@ exports.getSources = function(req, res, next){
 };
 
 /**	
- * Get all rows from a table
+ * Get all rows from a google spreadsheet
  */
- 
-exports.getGoogleSpreadSheet = function(source){
+ exports.getGoogleSpreadSheet = function(source){
 	
 	return function(cb){
 		// spreadsheet key is the long id in the sheets URL
@@ -195,6 +202,9 @@ exports.getGoogleSpreadSheet = function(source){
 	};
 };
 
+/*
+ * Get file from dropbox
+ */
 exports.getDropbox = function(source){
 	  
 	  return function(cb){
@@ -204,14 +214,12 @@ exports.getDropbox = function(source){
 				return cb(true, source);
 			  }
 			 
-			 client.readFile(source.fileId, function(error, data) {
+			 client.readFile(source.file, function(error, data) {
 				if (error) {
 					source.error = error.responseText;
 					return cb(true, source);
 				}
 			
-				var converter = new Converter({delimiter: ',', eol: '\n'});
-				
 				converter.fromString(data, function(err,result){
 					if (err){
 						source.error = err;
@@ -227,6 +235,10 @@ exports.getDropbox = function(source){
 	  };
 };
 
+/*
+ * get table from cartodb through query
+ * return in geojson format for tables that contain geodata
+ */
 exports.getCartoDB = function(source){
 	return function(cb){
 		try {
@@ -262,11 +274,15 @@ exports.getCartoDB = function(source){
 	};
 };
 
+/*
+ * get local file from drive.
+ * use either data/private or data/public as path to the file
+ */
 exports.getFileLocal = function(source){
 	  
 	  return function(cb){
 		    var obj;
-			fs.readFile(source.path, 'utf8', function (err, data) {
+			fs.readFile(source.file, 'utf8', function (err, data) {
 			  if (err) {
 				  source.error = err;
 				  return cb(true, source);
@@ -277,12 +293,20 @@ exports.getFileLocal = function(source){
 	  };
 };
 
+/*
+ * Get file from url
+ * Supports csv or geojson
+ */
 exports.getFileUrl = function(source){
 	  
 	  return function(cb){
+		    var json = false;
+			if(source.format === 'GeoJSON'){
+				json = true;
+			}
 		    request({
 				url: source.url,
-				json: true
+				json: json
 			}, function (err, response, body) {
 				if (err) {
 				  source.error = err;
@@ -290,7 +314,22 @@ exports.getFileUrl = function(source){
 			    }
 				
 				if (!err && response.statusCode === 200) {
-					source.data = body;
+					if(source.format === 'GeoJSON'){
+						source.data = body;
+					} else {
+						
+						converter.fromString(body, function(err,result){
+							if (err){
+								source.error = err;
+								return cb(true, source);
+							}
+							else {
+								source.data = result;
+								return cb(false, source);
+							}
+						});
+					}
+					
 					return cb(false, source);
 				}
 			});

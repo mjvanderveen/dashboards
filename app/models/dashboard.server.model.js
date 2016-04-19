@@ -1,4 +1,5 @@
 'use strict';
+var util = require('util');
 
 /**
  * Module dependencies.
@@ -24,84 +25,125 @@ try {
 } catch (e) {
   SpreadsheetColumn = mongoose.model('SpreadsheetColumn', SpreadsheetColumnSchema);
 }
+
+function BaseSchema(){
+
+	Schema.apply(this, arguments);  
 	
-var SourceSchema = new Schema({
-    name: {
-            type: String,
-            trim: true,
-            default: '',
-	    required:true,
-	    form:  {label:'Name', size:'large'},
-	    list:true
-    },
-    description: {
-		type: String,
-		default: '',
-		trim: true,
-		form:  {label:'Description', type:'textarea', size:'large', rows:5},
-		required: true
-	},
-	type: {
+	this.add( 
+	{
+		sourceId: {
+			type: String,
+			trim: true,
+			default: '',
+			required:true,
+			form:  {label:'Unique Source Identifier', size:'large', order: 1}
+		},
+		name: {
+			type: String,
+			trim: true,
+			default: '',
+			required:true,
+			form:  {label:'Name', size:'large', order: 2}
+		},
+		description: {
+			type: String,
+			default: '',
+			trim: true,
+			form:  {label:'Description', type:'textarea', size:'large', rows:5, order: 3},
+			required: false
+		},
+		isPublic: {
+			type: Boolean,
+			form:  {label:'Public dataset?'},
+			default: false
+		},
+		isActive: {
+			type: Boolean,
+			form:  {label:'Source Active?'},
+			default: true			
+		}
+	});
+}
+
+util.inherits(BaseSchema, Schema);
+
+var SourceSchema = new BaseSchema();
+
+SourceSchema.virtual('type').get(function () { return this.__t; });  
+
+var FileUrlSourceSchema = new BaseSchema({
+    format: {
 		 type: String, 
-		 default: 'Dropbox', 
-		 enum: ['Dropbox', 'Google Spreadsheet', 'CartoDB', 'FileLocal', 'FileUrl'] 
+		 default: 'GeoJSON', 
+		 enum: ['GeoJSON', 'CSV'],
+		 form:  {label:'File format', size:'large', order: 4}
 	},
-	format: {
-		 type: String, 
-		 default: 'Array', 
-		 enum: ['Array', 'GeoJSON'] 
-	},
-    fileId: {
-            type: String,
-            trim: true,
-            default: '',
-	    required:true,
-		form:  {showWhen:{lhs:'$type', comp:'ne', rhs:'CartoDB'}, label:'File identifier', size:'large'}
-    },
-	query: {
-		type: String,
-		trim: true,
-		default: '',
-		required:true,
-		form:  {showWhen:{lhs:'$type', comp:'eq', rhs:'CartoDB'}, label:'CartoDB query', size:'large'}
-    },
 	url: {
 		type: String,
 		trim: true,
 		default: '',
 		required:true,
-		form:  {showWhen:{lhs:'$type', comp:'eq', rhs:'CSV url'}, label:'URL to CSV', size:'large'}
+		form:  {label:'URL to CSV', size:'large', order: 5}
+    }
+});
+
+var FileLocalSourceSchema = new BaseSchema({
+    file: {
+        type: String,
+        trim: true,
+        default: '',
+	    required:true,
+		form:  {help:'name of the file including path and extension', label:'File identifier', size:'large', order: 4}		
     },
-	path: {
-		type: String,
-		trim: true,
-		default: '',
-		required:true,
-		form:  {showWhen:{lhs:'$type', comp:'eq', rhs:'CSV local'}, label:'path to local CSV', size:'large'}
-    },
+	format: {
+		 type: String, 
+		 default: 'GeoJSON', 
+		 enum: ['GeoJSON', 'CSV'],
+		 form:  {label:'File Format', size:'large', order: 5}
+	}
+});
+
+var GoogleSpreadsheetSourceSchema = new BaseSchema({
 	key: {
 		type: String,
 		trim: true,
 		default: '',
 		required:true,
-		form:  {showWhen:{lhs:'$type', comp:'eq', rhs:'Google Spreadsheet'}, label:'Spreadsheet unique key', size:'large'}
+		form:  {label:'Spreadsheet unique key', size:'large', order: 4}
     },
 	columns: {
 		type: [SpreadsheetColumnSchema],
 		required:true,
-		form:  {showWhen:{lhs:'$type', comp:'eq', rhs:'Google Spreadsheet'}, label:'Spreadsheet columns to include', size:'large'}
+		form:  {label:'Spreadsheet columns to include', size:'large', order: 5}
+
+    }
+});
+
+var DropboxSourceSchema = new BaseSchema({
+    file: {
+        type: String,
+        trim: true,
+        default: '',
+	    required:true,
+		form:  {label:'File identifier', size:'large', order: 4}
+		
+    }
+});
+
+var CartoDBSourceSchema = new BaseSchema({
+    query: {
+        type: String,
+        trim: true,
+        default: '',
+	    required:true,
+		form:  {label:'CartDB SQL Query', size:'large', order: 4}
     },
-	isPublic: {
-	    type: Boolean,
-		form:  {label:'Public dataset?'},
-	    default: false
-	    
-	},
-	isActive: {
-	    type: Boolean,
-		form:  {label:'Source Active?'},
-	    default: true
-	    
+	format: {
+		 type: String, 
+		 default: 'GeoJSON', 
+		 enum: ['GeoJSON', 'Array'],
+		 form:  {label:'File Format', size:'large', order: 5}
 	}
 });
 
@@ -112,9 +154,15 @@ try {
 } catch (e) {
   Source = mongoose.model('Source', SourceSchema);
 }
-	
+
+Source.discriminator('FileUrlSource', FileUrlSourceSchema);  
+Source.discriminator('FileLocalSource', FileLocalSourceSchema);
+Source.discriminator('DropboxSource', DropboxSourceSchema);
+Source.discriminator('GoogleSpreadsheetSource', GoogleSpreadsheetSourceSchema);
+Source.discriminator('CartoDBSource', CartoDBSourceSchema);
+
 /**
- * Article Schema
+ * Dashboard Schema
  */
 var DashboardSchema = new Schema({
 	name: {
@@ -149,8 +197,20 @@ var DashboardSchema = new Schema({
 		 default: 'user', 
 		 enum: ['user', 'admin'] 
 	},
-	sources: {
-		type: [SourceSchema]
+	FileLocalSources: {
+		type: [FileLocalSourceSchema]
+	},
+	DropboxSources: {
+		type: [DropboxSourceSchema]
+	},
+	CartoDBSources: {
+		type: [CartoDBSourceSchema]
+	},
+	FileUrlSources: {
+		type: [FileUrlSourceSchema]
+	},
+	GoogleSpreadsheetSources: {
+		type: [GoogleSpreadsheetSourceSchema]
 	},
 	user: {
 		type: Schema.ObjectId,
