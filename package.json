@@ -16,7 +16,7 @@
     "apicache": "0.0.x",
     "async": "1.5.x",
     "body-parser": "1.15.x",
-    "cartodb": "0.4.x",
+    "cartodb": "0.3.x",
     "compression": "^1.6.1",
     "connect-flash": "0.1.x",
     "connect-mongo": "0.4.x",

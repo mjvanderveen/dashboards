@@ -258,8 +258,9 @@ exports.getCartoDB = function(source){
 					
 					return cb(null, source);
 			  })
-			  .error(function(err) {
-				  return cb(new Error(err));
+			  .error(function(error) {
+				  console.log(error);
+				  return cb(new Error(error));
 			  });	
 
 		} catch (ex) {
