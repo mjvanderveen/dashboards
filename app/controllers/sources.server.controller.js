@@ -40,7 +40,7 @@ exports.getSources = function(req, res, next){
 			
 			//Use lean to return just the javascript object and not the full the model instance
 			Dashboard.findOne(criteria).lean().populate('user', 'displayName').exec(function(err, d) {
-				if (err) return err;
+				if (err) return next(new Error(err));
 				if (!d) return 'Failed to load dashboard: ' + dashboardId;
 				dashboard = d;
 				
@@ -164,14 +164,14 @@ exports.getSources = function(req, res, next){
 
 				if(rows.length === 0){
 					source.error = 'no rows in sheet';
-					console.log(source.error);
-					return step(source.error);
+					//console.log(source.error);
+					return step(new Error(source.error));
 				}
 
 				if(source.columns.length === 0){
 					source.error = 'no columns to be returned in filtered sheet';
 					console.log(source.error);
-					return step(source.error);
+					return step(new Error(source.error));
 				}
 				
 				// filter rows
@@ -194,9 +194,9 @@ exports.getSources = function(req, res, next){
 				step();
 			});
 		  }
-		 ], function(err) { //This function gets called after the two tasks have called their "task callbacks"
-				if (err) return cb(true, err);
-				return cb(false, source);
+		 ], function(err, results) { //This function gets called after the two tasks have called their "task callbacks"
+				if (err) return cb(err);
+				return cb(null, source);
 		});
 	};
 };
@@ -209,26 +209,22 @@ exports.getDropbox = function(source){
 	  return function(cb){
 		  dbClient.authenticate(function(error, client) {
 			  if (error) {
-				source.error = error.responseText;
-				return cb(true, source);
+				return cb(new Error(error));
 			  }
 			 
 			 client.readFile(source.file, function(error, data) {
 				if (error) {
-					source.error = error.responseText;
-					return cb(true, source);
+					return cb(new Error(error));
 				}
 			
 				var converter = new Converter({delimiter: ',', eol: '\n'});
 				converter.fromString(data, function(err,result){
 					if (err){
-						source.error = err;
-						console.log(source.error);
-						return cb(true, source);
+						return cb(new Error(err));
 					}
 					else {
 						source.data = result;
-						return cb(false, source);
+						return cb(null, source);
 					}
 				});
 			  });
@@ -260,16 +256,14 @@ exports.getCartoDB = function(source){
 						source.data = data.rows;
 					}
 					
-					return cb(false, source);
+					return cb(null, source);
 			  })
 			  .error(function(err) {
-				  source.error = err;
-				  return cb(true, source);
+				  return cb(new Error(err));
 			  });	
 
 		} catch (ex) {
-			source.error = 'query failed, no connection?';
-			return cb(true, source);
+			return cb(new Error('query failed, no connection?'));
 		}
 		
 	};
@@ -285,11 +279,10 @@ exports.getFileLocal = function(source){
 		    var obj;
 			fs.readFile(source.file, 'utf8', function (err, data) {
 			  if (err) {
-				  source.error = err;
-				  return cb(true, source);
+				  return cb(new Error(err));
 			  }
 			  source.data = JSON.parse(data);
-			  return cb(false, source);
+			  return cb(null, source);
 			});
 	  };
 };
@@ -310,29 +303,26 @@ exports.getFileUrl = function(source){
 				json: json
 			}, function (err, response, body) {
 				if (err) {
-				  source.error = err;
-				  return cb(true, source);
+				  return cb(new Error(err));
 			    }
 				
 				if (!err && response.statusCode === 200) {
 					if(source.format === 'GeoJSON'){
 						source.data = body;
+						return cb(null, source);
 					} else {
 						
 						var converter = new Converter({delimiter: ',', eol: '\n'});
 						converter.fromString(body, function(err,result){
 							if (err){
-								source.error = err;
-								return cb(true, source);
+								return cb(new Error(err));
 							}
 							else {
 								source.data = result;
-								return cb(false, source);
+								return cb(null, source);
 							}
 						});
 					}
-					
-					return cb(false, source);
 				}
 			});
 	  };

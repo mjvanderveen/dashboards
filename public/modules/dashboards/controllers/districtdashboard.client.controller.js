@@ -47,6 +47,7 @@ angular.module('dashboards')
 					$scope.mapChartType = 'leafletChoroplethChart';	
 			    },
 			    function(error) {
+					console.log(error);
 				//$scope.addAlert('danger', error.data.message);
 			    });
 				
@@ -57,7 +58,11 @@ angular.module('dashboards')
 			var d = $q.defer();
 		    var result = Sources.get({id: sid}, function() {
 				d.resolve(result);
-		    });
+		    },
+			function(error) {
+					console.log(error);
+				//$scope.addAlert('danger', error.data.message);
+			});
 		    
 			return d.promise;
 		};
