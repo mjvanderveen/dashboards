@@ -1,24 +1,20 @@
 <section class="section-expand" data-ng-controller="DistrictDashboardsController" data-ng-init="initiate()">
-	<div class="page-header">
-		<h3>{{dashboard.title}}</h3>
-	</div>
 	<div class="container">
 		<div cg-busy="{promise:promise,templateUrl:templateUrl,message:message,backdrop:backdrop,delay:delay,minDuration:minDuration}">
 			<div id="header" class="row">
 				<div class="col-md-8">
-					<div id="title">District Dashboard</div>
+					<div id="title"><h3>District Dashboard</3></div>
 				</div>
-				<div class="col-md-1">
-				</div>                            
 				<div id="count-info" class="col-md-4">
 					<span class="filter-count "></span> selected out of <span class="total-count "></span> records:   
 					<a href="javascript:dc.filterAll(); dc.redrawAll()">Reset All</a>
-				</div>                    
+				</div>   
+				<div class="col-md-1" />          
 			</div>
 			<div class="row">
 				<div class="col-md-4 colheight">
 					<b>Rode Kruis districten in Nederland</b>
-					<div id="map-chart" style="width:300px; height:480px;"></div>
+					<div id="map-chart" style="width:300px; height:100%;"></div>
 				</div>	
 				<div class="col-md-4 colheight">
 					<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
