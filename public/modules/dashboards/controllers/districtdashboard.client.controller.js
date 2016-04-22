@@ -5,7 +5,6 @@ angular.module('dashboards')
 	function($scope, $q, Authentication, Dashboards, Sources, $window, $stateParams, cfpLoadingBar) {
 
 		$scope.authentication = Authentication;
-		$scope.dashboard = null;
 		$scope.geom = null;
 		$scope.metric = 'R2HaantalActief';
 
@@ -32,19 +31,13 @@ angular.module('dashboards')
 		 */
 		$scope.initiate = function() {	    
 			
+			// start loading bar
+		    $scope.start();
+		  
 			Dashboards.get({dashboardId: $stateParams.dashboardId},
-			    function(data) {
-					// set data retrieved from the database
-					$scope.dashboard = data;
-				
-					// set the title
-					$scope.title = $scope.config.title;
-					
+			    function(data) {		
 					// get the data
-					$scope.getData($stateParams.dashboardId);
-						
-					// create the map chart (NOTE: this has to be done before the ajax call)
-					$scope.mapChartType = 'leafletChoroplethChart';	
+					$scope.prepare(data);
 			    },
 			    function(error) {
 					console.log(error);
@@ -53,48 +46,30 @@ angular.module('dashboards')
 				
 					
 		};  
-			
-		$scope.loadSources = function(sid){
-			var d = $q.defer();
-		    var result = Sources.get({id: sid}, function() {
-				d.resolve(result);
-		    },
-			function(error) {
-					console.log(error);
-				//$scope.addAlert('danger', error.data.message);
-			});
-		    
-			return d.promise;
-		};
 		
 		/**
 		 * get the data from the files as defined in the config.
 		 * load  them with ajax and if both are finished, generate the charts
 		 */
-		$scope.getData = function(dashboardId) {
+		$scope.prepare = function(dashboard) {
+		  // set the title
+		  $scope.title = $scope.config.title;
+				
+		  // create the map chart (NOTE: this has to be done before the ajax call)
+		  $scope.mapChartType = 'leafletChoroplethChart';	
+		  
+		  // The resp returns the data in another array, so use index 0 		  
+		  var d = {};
+		  $scope.geom = dashboard.sources.DistrictsLocal.data;
+		
+		  d.Ready2Helpers = dashboard.sources.Ready2HelpCartoDB.data;
+		  d.Districts = dashboard.sources.DistrictsLocal.data;
+		  d.Rapportage = dashboard.sources.DistrictsRapportage.data;
 			
-			// start loading bar
-			 $scope.start();
-			  
-			// Get data through $resource query to server, and only get data when all requests have resolved
-			$q.all([
-			   $scope.loadSources(dashboardId)
-			]).then(function(dt) {
-			  
-			  // The resp returns the data in another array, so use index 0
-			  var data = dt[0];	   		  
-			  var d = {};
-			  $scope.geom = data.DistrictsLocal.data;
-			
-			  d.Ready2Helpers = data.Ready2HelpCartoDB.data;
-			  d.Districts = data.DistrictsLocal.data;
-			  d.Rapportage = data.DistrictsRapportage.data;
-			    
-			  $scope.generateCharts(d);
-			  
-			  // end loading bar
-			  $scope.complete();	   
-			});
+		  $scope.generateCharts(d);
+		  
+		  // end loading bar
+		  $scope.complete();	   
 		};
 
 		// fill the lookup table with the name attributes
