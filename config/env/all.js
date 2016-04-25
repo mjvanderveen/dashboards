@@ -63,7 +63,6 @@ module.exports = {
 				'public/build/custom/forms-angular/js/forms-angular.js', //in bower.json
 				'public/build/bower/angular-messages/js/angular-messages.js', //in bower.json
 				'public/build/bower/ngInfiniteScroll/js/ng-infinite-scroll.js',//in bower.json
-				'public/lib/ngInfiniteScroll/build/ng-infinite-scroll.js',//in bower.json
 				'public/build/bower/angular-elastic/js/elastic.js', //in bower.json
 				'public/build/bower/underscore/js/underscore.js',//in bower.json
 				'public/build/bower/angular-loading-bar/js/loading-bar.js'

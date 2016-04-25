@@ -5,7 +5,6 @@ angular.module('dashboards')
 	function($scope, $q, Authentication, Dashboards, Sources, $window, $stateParams, cfpLoadingBar) {
 
 		$scope.authentication = Authentication;
-		$scope.dashboard = null;
 		$scope.geom = null;
 		$scope.metric = 'R2HaantalActief';
 
@@ -32,19 +31,13 @@ angular.module('dashboards')
 		 */
 		$scope.initiate = function() {	    
 			
+			// start loading bar
+		    $scope.start();
+		  
 			Dashboards.get({dashboardId: $stateParams.dashboardId},
-			    function(data) {
-					// set data retrieved from the database
-					$scope.dashboard = data;
-				
-					// set the title
-					$scope.title = $scope.config.title;
-					
+			    function(data) {		
 					// get the data
-					$scope.getData($stateParams.dashboardId);
-						
-					// create the map chart (NOTE: this has to be done before the ajax call)
-					$scope.mapChartType = 'leafletChoroplethChart';	
+					$scope.prepare(data);
 			    },
 			    function(error) {
 					console.log(error);
@@ -53,50 +46,31 @@ angular.module('dashboards')
 				
 					
 		};  
-			
-		$scope.loadSources = function(sid){
-			var d = $q.defer();
-		    var result = Sources.get({id: sid}, function() {
-				d.resolve(result);
-		    },
-			function(error) {
-					console.log(error);
-				//$scope.addAlert('danger', error.data.message);
-			});
-		    
-			return d.promise;
-		};
 		
 		/**
 		 * get the data from the files as defined in the config.
 		 * load  them with ajax and if both are finished, generate the charts
 		 */
-		$scope.getData = function(dashboardId) {
+		$scope.prepare = function(dashboard) {
+		  // set the title
+		  $scope.title = $scope.config.title;
+				
+		  // create the map chart (NOTE: this has to be done before the ajax call)
+		  $scope.mapChartType = 'leafletChoroplethChart';	
+		  
+		  // The resp returns the data in another array, so use index 0 		  
+		  var d = {};
+		  $scope.geom = dashboard.sources.DistrictsLocal.data;
+		
+		  d.Ready2Helpers = dashboard.sources.Ready2HelpCartoDB.data;
+		  d.Districts = dashboard.sources.DistrictsLocal.data;
+		  d.Rapportage = dashboard.sources.DistrictsRapportage.data;
 			
-			// start loading bar
-			 $scope.start();
-			  
-			// Get data through $resource query to server, and only get data when all requests have resolved
-			$q.all([
-			   $scope.loadSources(dashboardId)
-			]).then(function(dt) {
-			  
-			  // The resp returns the data in another array, so use index 0
-			  var data = dt[0];	   		  
-			  var d = {};
-			  $scope.geom = data.DistrictsLocal.data;
-			
-			  d.Ready2Helpers = data.Ready2HelpCartoDB.data;
-			  d.Districts = data.DistrictsLocal.data;
-			  d.Rapportage = data.DistrictsRapportage.data;
-			  console.log(d);
-			  //console.log($scope.geom);
-			    
-			  $scope.generateCharts(d);
-			  
-			  // end loading bar
-			  $scope.complete();	   
-			});
+		  $scope.generateCharts(d);
+		  
+		  // end loading bar
+		  $scope.complete();	   
+
 		};
 
 		// fill the lookup table with the name attributes
@@ -410,58 +384,13 @@ angular.module('dashboards')
 			
 			// we need this becuase we used d3 to load the data and we are outside the angular space
             //$scope.$apply();
-			/*
-			dc.compositeChart('#composite-chart')
-				.width(600)
-				.height(500)
-				.margins({top: 0, left: 10, right: 50, bottom: 20})
-				.dimension(districtDimension)
-				.compose([
-					dc.rowChart('#chart')
-						.group(districtGroupSum)
-						.colors(['#CCCCCC', $scope.config.color])
-						.colorDomain([0, 1])
-						.colorAccessor(function (d) {
-							if(d.value > 0){
-								return 1;
-							} else {
-								return 0;
-							}
-						})           
-						.ordering(function(d) { return -d.value; })
-						.label(function (d) { return lookup[d.key]; })
-						.title(function (d) { return numberFormat(d.value); })
-					,dc.rowChart('#chart')
-						.group(districtGroupSum2)
-						.colors(['#CCCCCC', $scope.config.color])
-						.colorDomain([0, 1])
-						.colorAccessor(function (d) {
-							if(d.value > 0){
-								return 1;
-							} else {
-								return 0;
-							}
-						})           
-						.ordering(function(d) { return -d.value; })
-						.label(function (d) { return lookup[d.key]; })
-						.title(function (d) { return numberFormat(d.value); })
-				])
-				//.group(districtGroupSum)
-				//.stack(districtGroupSum2)
-				//.renderLabel(true)
-				//.renderTitleLabel(true)
-				//.titleLabelOffsetX(-30)
-				//.elasticX(true)
-				//.xAxis().ticks(4)
-				;
-			*/	
+			
 			districtChart
 				.width(300)
 				.height(450)
 				.margins({top: 0, left: 10, right: 80, bottom: 20})
 				.dimension(districtDimension)
 				.group(districtGroupSum)
-				//.stack(districtGroupSum2)
 				.colors(['#CCCCCC', $scope.config.color])
 				.colorDomain([0, 1])
 				.colorAccessor(function (d) {
@@ -489,86 +418,6 @@ angular.module('dashboards')
 				  districtChart.redraw();
 				};
 			
-/*			
-			districtChart2
-				.width(300)
-				.height(500)
-				.margins({top: 0, left: 10, right: 50, bottom: 20})
-				.dimension(districtDimension)
-				.group(districtGroupSum2)
-				.colors(['#CCCCCC', $scope.config.color])
-				.colorDomain([0, 1])
-				.colorAccessor(function (d) {
-					if(d.value > 0){
-						return 1;
-					} else {
-						return 0;
-					}
-				})           
-				.ordering(function(d) { return -d.value; })
-				.label(function (d) { return lookup[d.key]; })
-				.title(function (d) { return numberFormat(d.value); })
-				//.renderLabel(true)
-				.renderTitleLabel(true)
-				.titleLabelOffsetX(-50)
-				.elasticX(true)
-				.xAxis().ticks(4)
-				;
-*/			/*	
-			districtChart
-				.width(600)
-				.height(500)
-				.margins({top: 0, left: 10, right: 50, bottom: 20})
-				.dimension(testDimension)
-				.group(testGroupCount)
-				//.data(function(group) { return group.top(15);})
-				.colors(['#CCCCCC', $scope.config.color])
-				.colorDomain([0, 1])
-				.colorAccessor(function (d) {
-					if(d.value > 0){
-						return 1;
-					} else {
-						return 0;
-					}
-				})           
-				//.colors(d3.scale.ordinal().range(['#0080ff']))
-				.ordering(function(d) { return -d.value; })
-				.label(function (d) { return d.key ; })
-				.title(function (d) { return d.value; })
-				.renderLabel(true)
-				//.labelOffsetX(10)
-				.renderTitleLabel(true)
-				.titleLabelOffsetX(-30)
-				//.titleLabelOffsetX(function(d) {return d.value; })
-				.elasticX(true)
-				//.xAxis(xAxis) //.ticks(4)
-				//.turnOnControls(true)
-				;
-			*/
-			/*
-			firstLetterChart
-				.width(600)
-				.height(300)
-				.radius(100)
-				.innerRadius(50)
-				.dimension(whereDimensionFL)
-				.group(whereGroupSumFL)
-				.colors(d3.scale.linear().domain([0,5417]).range(['#CCCCCC', '#0080ff']))
-				.colorAccessor(function(d) { return d.value; })
-				.ordering(function(d) { return -d.value; })
-				.legend(dc.legend().x(140).y(0).gap(5))
-				//.label(function (d) { return d.key; })
-				//.title(function (d) { return d.value; })
-				//.renderLabel(true)
-				//.labelOffsetX(10)
-				//.renderTitleLabel(true)
-				//.titleLabelOffsetX(-30)
-				//.titleLabelOffsetX(function(d) {return d.value; })
-				//.elasticX(true)
-				//.xAxis(xAxis) //.ticks(4)
-				//.turnOnControls(true)
-				;
-			*/	
 			mapChart
 				.width($('#map-chart').width())
 				.height(360)
@@ -576,7 +425,7 @@ angular.module('dashboards')
 				.group(whereGroupSum)
 				.center([0,0])
 				.zoom(0)    
-				.geojson(d.Districts.features) //geom)
+				.geojson(d.Districts) //geom)
 				.colors(['#CCCCCC', $scope.config.color])
 				.colorDomain([0, 1])
 				.colorAccessor(function (d) {
@@ -610,7 +459,7 @@ angular.module('dashboards')
 					
 			
 			
-			};
+		};
 		
 		
 		

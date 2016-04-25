@@ -193,9 +193,11 @@ var DashboardSchema = new Schema({
 	    
 	},
 	roles: {
-		 type: String, 
-		 default: 'user', 
-		 enum: ['user', 'admin'] 
+		type: [{
+			type: String,
+			enum: ['user', 'admin']
+		}],
+		default: ['user']
 	},
 	FileLocalSources: {
 		type: [FileLocalSourceSchema]
