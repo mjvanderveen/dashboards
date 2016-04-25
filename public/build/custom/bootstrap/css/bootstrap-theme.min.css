@@ -5778,10 +5778,10 @@ button.close {
 .controlsBlock {
    	position: relative;
    	bottom: 0;
-   	left: 0;
+   	left: -30px;
    	top: 10px;
    	display: block;
-   	width: 177px;
+   	width: 400px;
    	margin: 0 auto;
    	z-index: 1;
    	height: 24px;
@@ -5795,7 +5795,7 @@ button.close {
 
 .carousel-control {
   	position: absolute;
-  	top: 25.5px;
+  	top: -500px;
   	bottom: 0;
   	left: 0;
   	background: #000000;
@@ -5844,7 +5844,7 @@ button.close {
   	left: 50%;
   	z-index: 15;
   	width: 60%;
-  	top: 10px;
+  	top: -30px;
   	padding-left: 0;
   	margin-left: -30%;
   	text-align: center;
@@ -5926,4 +5926,13 @@ button.close {
   	}
 }
 
+/* Addition for dc-data-tables in dashboard */
+.table-dashboard > thead > tr > th,
+.table-dashboard > tbody > tr > th,
+.table-dashboard > tfoot > tr > th,
+.table-dashboard > thead > tr > td,
+.table-dashboard > tbody > tr > td,
+.table-dashboard > tfoot > tr > td {
+  width: 180px;
+}
 
