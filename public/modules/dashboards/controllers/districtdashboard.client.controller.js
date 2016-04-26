@@ -200,7 +200,7 @@ angular.module('dashboards')
 				.group(whereGroupSum)
 				.center([0,0])
 				.zoom(0)    
-				.geojson(d.Districts) //geom)
+				.geojson(d.Districts)
 				.colors(['#CCCCCC', $scope.config.color])
 				.colorDomain([0, 1])
 				.colorAccessor(function (d) {if(d>0){return 1;} else {return 0;}})           
@@ -246,7 +246,7 @@ angular.module('dashboards')
 					.valueAccessor(function(d) {return d.value.finalVal;})
 					.colorAccessor(function (d) {if(d.value.finalVal > 0){return 1;} else {return 0;}})            
 					.ordering(function(d) { return -d.value.finalVal; })
-					.title(function(d) {return numberFormatPerc(d.value.finalVal);});
+					.title(function(d) { if (d.value.sumOfTotal === 0) {return 0;} else {return numberFormatPerc(d.value.finalVal);}});
 			  } else {
 			    districtGroupSum = districtDimension.group().reduceSum(function(d) { return d[id];});	
 				districtChart
