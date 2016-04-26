@@ -5772,16 +5772,16 @@ button.close {
 }
 
 // change it according to your needs
-.carousel-control.left { left: -10px; }
-.carousel-control.right { right: -10px; }
+.carousel-control.left { left: -50px; }
+.carousel-control.right { right: -50px; }
 
 .controlsBlock {
-   	position: relative;
+   	position: absolute;
    	bottom: 0;
-   	left: -30px;
-   	top: 10px;
+   	left: -20px;
+   	top: 7px;
    	display: block;
-   	width: 400px;
+   	width: 360px;
    	margin: 0 auto;
    	z-index: 1;
    	height: 24px;
@@ -5795,7 +5795,7 @@ button.close {
 
 .carousel-control {
   	position: absolute;
-  	top: -500px;
+  	top: 0;
   	bottom: 0;
   	left: 0;
   	background: #000000;
@@ -5841,10 +5841,10 @@ button.close {
 .carousel-indicators {
   	position: relative;
   	bottom: 0;
-  	left: 50%;
+  	left: 80%;
   	z-index: 15;
   	width: 60%;
-  	top: -30px;
+  	top: -7px;
   	padding-left: 0;
   	margin-left: -30%;
   	text-align: center;
@@ -5899,7 +5899,7 @@ button.close {
 	}
 
 	.carousel-inner > .item {
-		height: 500px;
+		height: 100%;
 	}
 
 	.carousel-inner > .item > img,
@@ -5936,3 +5936,4 @@ button.close {
   width: 180px;
 }
 
+.dc-table-group {visibility: collapse; height: 0px}
