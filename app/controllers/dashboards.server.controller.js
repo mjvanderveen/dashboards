@@ -17,6 +17,7 @@ var mongoose = require('mongoose'),
 	Converter = require('csvtojson').Converter,
 	secrets = require('../../config/secrets'),
 	dbClient = new Dropbox.Client(secrets.dropbox),
+	sharepoint = require('sharepointconnector')(secrets.sharepoint),
 	fs = require('fs'),
 	request =   require('request');
 
@@ -127,6 +128,9 @@ exports.list = function(req, res) {
 	});
 };
 
+/*
+ * asynchronous call to all sources that are in the dashboard object
+ */
 var getSources = function(dashboard, callback){
 
 	var tasks = [];
@@ -173,6 +177,14 @@ var getSources = function(dashboard, callback){
 		})(source);
 	});
 	
+	dashboard.SharepointSources.forEach(function(source, index) {
+	(function(source) {
+		  if(source.isActive){
+				tasks.push(exports.getSharepointFile(source));
+		  }				  
+		})(source);
+	});
+	
 	// perform all tasks in parallel
 	async.parallel(tasks, function(err, sourceArr) {
 		if(err) { callback(err); }
@@ -180,11 +192,14 @@ var getSources = function(dashboard, callback){
 		// simplify sources to send back to client
 		var result = {};
 		sourceArr.forEach(function(source){
-			result[source.sourceId] = {name: source.name, data: source.data, public: source.isPublic};
+			if(source){
+				result[source.sourceId] = {name: source.name, data: source.data, public: source.isPublic};
+			}
 		});
 		
 		dashboard.sources = result;
 		
+		// callback without error, with dashboard
 		callback(null, dashboard);
 	});
 
@@ -237,6 +252,12 @@ var getSources = function(dashboard, callback){
 					return step(new Error(source.error));
 				}
 				
+				// turn collumn string into array and trim
+				var cols = source.columns.split(',');
+				for (var j = 0; j < cols.length; j++){
+					cols[j] = cols[j].trim();
+				}
+			
 				// filter rows
 				for( var i in rows) {
 				
@@ -244,7 +265,7 @@ var getSources = function(dashboard, callback){
 					for (var property in rows[i]) {
 
 					  if (rows[i].hasOwnProperty(property)) {
-						  if (source.columns.indexOf(property) >= 0) {
+						  if (cols.indexOf(property) >= 0) {
 							d[property] = rows[i][property];
 						  }
 					  }
@@ -349,6 +370,28 @@ exports.getFileLocal = function(source){
 			  return cb(null, source);
 			});
 	  };
+};
+
+exports.getSharepointFile = function(source){
+	return function(cb){
+		var data = {};
+		sharepoint.login(function(err){
+		  if (err){
+			return cb(err);
+		  }
+		  
+		  // Once logged in, we can list the "lists" within sharepoint
+		  sharepoint.lists.list(function(err, listRes){
+			  var aList = listRes[0];
+			// We can pick a particular list, and read it. This also gives us the list's Items[] and Fields[]
+			sharepoint.lists.read(aList.Id, function(err, listRead){
+			  console.log(listRead);
+			});
+		  });
+		  
+		  cb(null, data);
+		});
+	};
 };
 
 /*

@@ -8,6 +8,7 @@ angular.module('dashboards')
 		$scope.geom = null;
 		//Specify which metric is filling the row-chart when opening the dashboard
 		$scope.metric = 'R2HaantalActief';
+		var mapChart;
 
 		$scope.config =  {
 							whereFieldName:'districtcode',
@@ -28,7 +29,13 @@ angular.module('dashboards')
 		 * Initiate the dashboard
 		 */
 		$scope.initiate = function() {	    
+				
+			// create the map chart (NOTE: this has to be done before the ajax call)
+			$scope.mapChartType = 'leafletChoroplethChart';	
 			
+			mapChart = dc.leafletChoroplethChart('#map-chart');
+			var map = mapChart.map();
+		  
 			// start loading bar
 		    $scope.start();
 		  
@@ -53,8 +60,6 @@ angular.module('dashboards')
 		  // set the title
 		  $scope.title = $scope.config.title;
 				
-		  // create the map chart (NOTE: this has to be done before the ajax call)
-		  $scope.mapChartType = 'leafletChoroplethChart';	
 		  
 		  // The resp returns the data in another array, so use index 0 		  
 		  var d = {};
@@ -90,8 +95,7 @@ angular.module('dashboards')
 				
 			//define dc-charts (the name-tag following the # is how you refer to these charts in html with id-tag)
 			var districtChart = dc.rowChart('#row-chart');
-			var mapChart = dc.leafletChoroplethChart('#map-chart');
-					
+									
 			// get the lookup table
 			var lookup = $scope.genLookup();
 			
@@ -518,7 +522,15 @@ angular.module('dashboards')
 						;							
 						
 			//Render all dc-charts and -tables
-			dc.renderAll();
+			//dc.renderAll();
+			var isRendered = false;
+			if(isRendered)
+				dc.redrawAll();
+			else {
+				dc.renderAll();
+				isRendered = true;
+			}
+
 			
 			//Extra code needed to initialize the map container
 			//NOTE: this gives a 'Map container already initialized'-error when moving away from the districtdashboard and returning (via navigation)

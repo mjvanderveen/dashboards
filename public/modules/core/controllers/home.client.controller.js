@@ -3,9 +3,7 @@
 angular.module('core').controller('HomeController', ['$scope', 'Authentication', 'leafletData',
 	function ($scope, Authentication, leafletData) {
     $scope.authentication = Authentication;
-    
-
-    
+      
     angular.extend($scope, {
                     defaults: {
                         tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',

@@ -22,7 +22,7 @@
     "angular-ui-router": "~0.2.10",
     "angular-bootstrap": "*",
     "angular-leaflet-directive": "0.10.0",
-    "leaflet-search": "~1.9.1",
+    "leaflet-search": "1.9.7",
     "leaflet-ajax": "~2.0.0",
     "angular-gettext": "*",
     "Snap.svg": "*",
@@ -32,7 +32,8 @@
 	"angular-messages": "1.5.*",
 	"ngInfiniteScroll": "1.2.*",
 	"angular-elastic": "2.5.*",
-    "underscore": "1.8.*"
+    "underscore": "1.8.*",
+	"leaflet-gps": "1.0.*"
   },
   "install": {
     "base": "public/build/bower",
@@ -52,6 +53,7 @@
       "bootstrap": [
         "public/lib/bootstrap/dist/js/bootstrap.min.js",
         "public/lib/bootstrap/dist/css/bootstrap.min.css",
+		"public/lib/bootstrap/dist/css/bootstrap.min.css.map",
         "public/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.eot",
         "public/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.svg",
         "public/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf",

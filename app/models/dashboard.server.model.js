@@ -7,25 +7,6 @@ var util = require('util');
 var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
-var SpreadsheetColumnSchema = new Schema({
-    title: {
-        type: String,
-        trim: true,
-        default: '',
-	    required:true,
-	    form:  {label:'Column title', size:'large'},
-	    list:true
-    }
-});
-
-var SpreadsheetColumn;
-
-try {
-  SpreadsheetColumn = mongoose.model('SpreadsheetColumn');
-} catch (e) {
-  SpreadsheetColumn = mongoose.model('SpreadsheetColumn', SpreadsheetColumnSchema);
-}
-
 function BaseSchema(){
 
 	Schema.apply(this, arguments);  
@@ -113,9 +94,9 @@ var GoogleSpreadsheetSourceSchema = new BaseSchema({
 		form:  {label:'Spreadsheet unique key', size:'large', order: 4}
     },
 	columns: {
-		type: [SpreadsheetColumnSchema],
+		type: String,
 		required:true,
-		form:  {label:'Spreadsheet columns to include', size:'large', order: 5}
+		form:  {label:'Spreadsheet columns to include (comma separated)', size:'large', order: 5}
 
     }
 });
@@ -147,6 +128,27 @@ var CartoDBSourceSchema = new BaseSchema({
 	}
 });
 
+var SharepointSourceSchema = new BaseSchema({
+    file: {
+        type: String,
+        trim: true,
+        default: '',
+	    required:true,
+		form:  {label:'File identifier', size:'large', order: 4}
+    },
+	context:{ 
+		type: String, 
+		default: '', 
+	},
+	format: {
+		 type: String, 
+		 default: 'GeoJSON', 
+		 enum: ['GeoJSON', 'Array'],
+		 form:  {label:'File Format', size:'large', order: 5}
+	}
+});
+
+
 var Source;
 
 try {
@@ -160,6 +162,7 @@ Source.discriminator('FileLocalSource', FileLocalSourceSchema);
 Source.discriminator('DropboxSource', DropboxSourceSchema);
 Source.discriminator('GoogleSpreadsheetSource', GoogleSpreadsheetSourceSchema);
 Source.discriminator('CartoDBSource', CartoDBSourceSchema);
+Source.discriminator('SharepointSource', SharepointSourceSchema);
 
 /**
  * Dashboard Schema
@@ -213,6 +216,9 @@ var DashboardSchema = new Schema({
 	},
 	GoogleSpreadsheetSources: {
 		type: [GoogleSpreadsheetSourceSchema]
+	},
+	SharepointSources: {
+		type: [SharepointSourceSchema]
 	},
 	user: {
 		type: Schema.ObjectId,
