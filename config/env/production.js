@@ -3,7 +3,7 @@
 var secrets = require('../secrets');
 
 module.exports = {
-	db: process.env.MONGOHQ_URL || process.env.MONGOLAB_URI || 'mongodb://localhost/im-dev',
+	db: process.env.MONGOHQ_URL || process.env.MONGOLAB_URI || 'mongodb://localhost/dashboards',
 	log: {
 		// Can specify one of 'combined', 'common', 'dev', 'short', 'tiny'
 		format: 'combined',
@@ -17,82 +17,67 @@ module.exports = {
 	usessl: true, // should an encrypted server be launced?
 	port: process.env.PORT || 3000,
 	sslport: process.env.SSLPORT || 444,
-	key_file: './config/cert/rodekruis-key.pem',
-	cert_file: './config/cert/rodekruis-cert.pem',
+	key_file: './config/cert/localhost-key.pem',
+	cert_file: './config/cert/localhost-cert.pem',
 	ca_file: './config/cert/thawte.ca',
 	ca2_file: './config/cert/thawte2.ca',
 	app: {
-		title: 'Rode Kruis Digital Operations Center'
+		title: 'Rode Kruis Dashboards'
 	},
 	assets: {
 		lib: {
 			css: [
-				'public/lib/bootstrap/dist/css/bootstrap.min.css',
-				'public/lib/bootstrap/dist/css/bootstrap-theme.css',
-				'public/lib/bootstrap-glyphicons/css/bootstrap.icon-large.min.css',
-				'public/lib/leaflet-dist/leaflet.css',
-				'public/lib/cartodb.js/dist/cartodb.css',
-				'public/lib/jquery-ui/themes/smoothness/jquery-ui.min.css',
-				'public/lib/angular-centered/angular-centered.css',
-				'public/lib/ng-grid/ng-grid.min.css',
-				'public/lib/select2/select2.css',
-				'public/lib/angular-carousel/dist/angular-carousel.min.css',
-				'public/lib/leaflet-search/dist/leaflet-search.min.css',
-				'public/lib/angular-busy/dist/angular-busy.min.css',
-				'public/lib/leaflet-gps/dist/leaflet-gps.min.css',
-				'public/lib/font-awesome/css/font-awesome.css',
-				//'public/lib/Humanitarian-Font/css/font-awesome.min.css',
-				'public/lib/angular/angular-csp.css',
-				'public/lib/ui-iconpicker/dist/styles/ui-iconpicker.css'				
+				'public/build/bower/forms-angular/css/forms-angular-with-bs3.css', // in bower.json
+				'public/build/bower/bootstrap/css/bootstrap.min.css', // in bower.json
+				'public/build/custom/bootstrap/css/bootstrap-theme.min.css', // in bower.json
+				'public/build/custom/leaflet/css/leaflet.css', // in bower.json
+				'public/build/bower/cartodb.js/css/cartodb.css', // in bower.json
+				'public/build/bower/angular/css/angular-csp.css', // in bower.json
+				'public/build/bower/mdi/css/materialdesignicons.min.css', // in bower.json
+				'public/build/bower/dcjs/css/dc.css', // in bower.json
+				'public/build/custom/dc-leaflet/css/dc-leaflet-legend.min.css', // NOT in bower.json
+				//'public/build/bower/materialize/css/materialize.css', // in bower.json
+				'public/build/bower/angular-loading-bar/css/loading-bar.css', // in bower.json
+				'public/build/bower/leaflet-search/js/leaflet-search.src.css' // in bower.json				
 			],
 			js: [
-				'public/lib/jquery/jquery.min.js',
-				'public/lib/jquery-ui/ui/minified/jquery-ui.min.js',
-				'public/lib/lodash/dist/lodash.min.js',
-				'public/lib/angular/angular.min.js',
-				'public/lib/angular-lodash/angular-lodash.js',
-				'public/lib/angular-route/angular-route.min.js',
-				'public/lib/angular-resource/angular-resource.min.js', 
-				'public/lib/angular-cookies/angular-cookies.min.js',    
-				'public/lib/angular-animate/angular-animate.min.js', 
-				'public/lib/angular-touch/angular-touch.min.js',  
-				'public/lib/angular-sanitize/angular-sanitize.min.js', 
-				'public/lib/angular-ui-router/release/angular-ui-router.min.js',
-				'public/lib/angular-ui-utils/ui-utils.min.js',
-				'public/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
-				'public/lib/angular-leaflet/dist/angular-leaflet-directive.min.js',
-				'public/lib/leaflet/dist/leaflet.js',
-				'public/lib/cartodb.js/dist/cartodb.noleaflet.js',
-				'public/lib/cartodb.js/activelayers.js',
-				'public/lib/angular-centered/angular-centered.js',
-				'public/lib/angular-deckgrid/angular-deckgrid.js',
-				'public/lib/angular-ui-sortable/sortable.min.js',
-				'public/lib/angular-ui-date/src/date.js',
-				//'public/lib/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js',
-				'public/lib/ngInfiniteScroll/build/ng-infinite-scroll.min.js',
-				'public/lib/jspdf/dist/jspdf.min.js',
-				'public/lib/ng-grid/build/ng-grid.min.js',
-				'public/lib/angular-elastic/elastic.js',
-				'public/lib/angular-ui-select2/src/select2.js',
-				'public/lib/ckeditor/ckeditor.js',
-				'public/lib/ng-ckeditor/ng-ckeditor.min.js',
-				'public/lib/angular-carousel/dist/angular-carousel.min.js',
-				'https://maps.googleapis.com/maps/api/js?v=3&sensor=true',
-				'public/lib/leaflet-search/dist/leaflet-search.min.js',
-				'public/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
-				'public/lib/Leaflet.NonTiledLayer/NonTiledLayer.WMS.js',
-				'public/lib/leaflet-betterwms/L.TileLayer.BetterWMS.js',
-				'public/lib/Leaflet.WMS.GetLegendGraphic/leaflet-wms-getlegendgraphic.js',
-				'public/lib/azgs-leaflet/js/lib/less-1.2.2.min.js',
-				'public/lib/azgs-leaflet/js/lib/jade.js',
-				'public/lib/leaflet.ajax/dist/leaflet.ajax.min.js',
-				'public/lib/azgs-leaflet/js/azgs-leaflet/GeoJSON.WFS.js',
-				'public/lib/azgs-leaflet/js/azgs-leaflet/GeoJSON.WFS.ClickResponder.js',
-				'public/lib/angular-busy/dist/angular-busy.min.js',
-				'public/lib/leaflet-gps/dist/leaflet-gps.min.js',
-				'public/lib/angular-gettext/dist/angular-gettext.min.js',
+				'public/build/bower/jquery/js/jquery.min.js', // in bower.json
+				'public/build/bower/crossfilter/js/crossfilter.min.js',
+				//'public/lib/jquery-ui/ui/jquery-ui.js',
+				'public/build/bower/lodash/js/lodash.underscore.min.js', //in bower.json
+				'public/build/bower/angular/js/angular.js', //in bower.json
+				'public/build/bower/angular-lodash/js/angular-lodash.js', //in bower.json
+				'public/build/bower/angular-route/js/angular-route.js', //in bower.json
+				'public/build/bower/angular-resource/js/angular-resource.js', //in bower.json
+				'public/build/bower/angular-cookies/js/angular-cookies.js', //in bower.json 
+				'public/build/bower/angular-touch/js/angular-touch.js', 
+				'public/build/bower/angular-sanitize/js/angular-sanitize.js', 
+				'public/build/bower/angular-ui-router/js/angular-ui-router.min.js',
+				'public/build/bower/bootstrap/js/bootstrap.min.js',
+				'public/build/bower/angular-bootstrap/js/ui-bootstrap-tpls.js',
+				'public/build/bower/leaflet/js/leaflet-src.js',//in bower.json
+				'public/build/bower/angular-leaflet-directive/js/angular-leaflet-directive.js', // in bower.json
+				'public/build/bower/leaflet-search/js/leaflet-search.src.js',
+				'public/build/bower/leaflet-ajax/js/leaflet.ajax.js',
+				'public/build/bower/angular-gettext/js/angular-gettext.js',
 				'public/dist/translations.js',
-				'public/lib/ui-iconpicker/dist/scripts/ui-iconpicker.js'
+				'public/build/bower/Snap.svg/js/snap.svg-min.js',
+				'public/build/bower/d3/js/d3.js',
+				'public/build/bower/dcjs/js/dc.js', //in bower.json
+				'public/build/custom/dc-leaflet/js/dc-leaflet-dev.js', // NOT in bower.json
+				//'public/build/custom/leaflet-map/js/dc-leaflet.js', // NOT in bower.json
+				//'public/build/bower/materialize/js/materialize.js',
+				'public/build/custom/leaflet-stamen/tile.stamen.js', // NOT in bower.json
+				'public/build/custom/angular-dc/js/angular-dc.js', //in bower.json
+				'public/build/custom/forms-angular/js/forms-angular.js', //in bower.json
+				'public/build/bower/angular-messages/js/angular-messages.js', //in bower.json
+				'public/build/bower/ngInfiniteScroll/js/ng-infinite-scroll.js',//in bower.json
+				'public/build/bower/angular-elastic/js/elastic.js', //in bower.json
+				'public/build/bower/underscore/js/underscore.js',//in bower.json
+				'public/build/bower/angular-loading-bar/js/loading-bar.js',
+				'public/build/bower/leaflet-gps/js/leaflet-gps.min.js', // in bower.json
+				'https://maps.googleapis.com/maps/api/js?v=3&sensor=true',
+				'public/build/bower/cartodb.js/js/cartodb_noleaflet.js' // in bower,json
 			]
 		},
 		css: 'public/dist/application.min.css',
@@ -123,8 +108,8 @@ module.exports = {
 		clientSecret: secrets.azure.clientSecret,
 		tenantId: secrets.azure.tenantId,
 		resource: 'https://graph.windows.net',
-		redirectURL: 'http://dashboards.rodekruis.nl/auth/azure/callback',
-		redirectURLSSL: 'https://dashboards.rodekruis.nl/auth/azure/callback'
+		redirectURL: 'http://digidocdev.rodekruis.nl/auth/azure/callback',
+		redirectURLSSL: 'https://digidocdev.rodekruis.nl/auth/azure/callback'
 	},
 	onedrive: {
 		oneDriveBusinessBaseUrl : 'https://rodekruis-my.sharepoint.com/_api/v2.0'
