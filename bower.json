@@ -79,7 +79,7 @@
         "public/lib/crossfilter/crossfilter.min.js"
       ],
       "lodash": [
-        "public/lib/lodash/dist/lodash.underscore.min.js"
+        "public/lib/lodash/dist/lodash.min.js"
       ],
       "mdi": [
         "public/lib/mdi/css/materialdesignicons.min.css",

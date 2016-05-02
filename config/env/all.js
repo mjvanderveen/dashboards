@@ -27,7 +27,7 @@ module.exports = {
 				'public/build/custom/dc-leaflet/css/dc-leaflet-legend.min.css', // NOT in bower.json
 				//'public/build/bower/materialize/css/materialize.css', // in bower.json
 				'public/build/bower/angular-loading-bar/css/loading-bar.css', // in bower.json
-				'public/lib/leaflet-search/dist/leaflet-search.src.css' // in bower.json
+				'public/build/bower/leaflet-search/js/leaflet-search.src.css' // in bower.json
 				
 			],
 			js: [
