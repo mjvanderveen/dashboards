@@ -11,7 +11,7 @@
     "materialize": "*",
     "mdi": "~1.5.54",
     "dcjs": "2.0.0-beta.3",
-    "lodash": "~4.11.1",
+    "lodash": "2.4.2",
     "angular-lodash": "*",
     "angular-route": "*",
 	"angular-loading-bar" : "*",
@@ -79,7 +79,7 @@
         "public/lib/crossfilter/crossfilter.min.js"
       ],
       "lodash": [
-        "public/lib/lodash/dist/lodash.min.js"
+        "public/lib/lodash/dist/lodash.underscore.min.js"
       ],
       "mdi": [
         "public/lib/mdi/css/materialdesignicons.min.css",
