@@ -126,15 +126,10 @@ angular.module('dashboards')
 			// set month and year to last available in dataset
 			var monthAccessor = function (d) { return d.Maand; };
 			var yearAccessor = function (d) { return d.Jaar; };
-			
-			var monthExtent = [];
-			var yearExtent = [];
-			monthExtent = d3.extent(d.Rapportage, monthAccessor);
-			yearExtent = d3.extent(d.Rapportage, yearAccessor);
-			
+			var monthExtent = d3.extent(d.Rapportage, monthAccessor);
+			var yearExtent = d3.extent(d.Rapportage, yearAccessor);
 			var maxMonth = monthExtent[1];
 			var maxYear = yearExtent[1];
-			
 			monthDimension.filter(maxMonth);
 			yearDimension.filter(maxYear);
 			
