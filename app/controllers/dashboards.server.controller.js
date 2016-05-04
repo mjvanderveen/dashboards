@@ -363,11 +363,28 @@ exports.getFileLocal = function(source){
 	  return function(cb){
 		    var obj;
 			fs.readFile(source.file, 'utf8', function (err, data) {
-			  if (err) {
-				  return cb(new Error(err));
-			  }
-			  source.data = JSON.parse(data);
-			  return cb(null, source);
+			if (err) {
+			  return cb(new Error(err));
+			}
+			  
+			if(source.format === 'GeoJSON'){
+				source.data = JSON.parse(data);
+				return cb(null, source);
+			} else {
+				
+				var converter = new Converter({delimiter: ',', eol: '\n'});
+				converter.fromString(data, function(err,result){
+					if (err){
+						return cb(new Error(err));
+					}
+					else {
+						source.data = result;
+						return cb(null, source);
+					}
+				});
+			}
+					
+			  
 			});
 	  };
 };

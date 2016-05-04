@@ -60,10 +60,14 @@ angular.module('dashboards')
 		  var d = {};
 		  $scope.geom = dashboard.sources.DistrictsLocal.data;
 		
-		  d.Ready2Helpers = dashboard.sources.Ready2HelpCartoDB.data;
 		  d.Districts = dashboard.sources.DistrictsLocal.data;
 		  d.Rapportage = dashboard.sources.DistrictsRapportage.data;
-			
+		   
+		  // turn month and day to date
+		  d.Rapportage.forEach(function(d) {
+				d.date = new Date(d.Jaar,d.Maand);
+		  });
+					
 		  $scope.generateCharts(d);
 		  
 		  // end loading bar
@@ -79,7 +83,6 @@ angular.module('dashboards')
 			});
 			return lookup;
 		};
-		
 		
 		/**
 		 * function to generate the 3W component
@@ -113,10 +116,27 @@ angular.module('dashboards')
 			var whereDimension = cf.dimension(function(d) { return d.DistrictNummer; });
 			// Create the same dimension again with another name for the row-chart, because two charts cannot have the same dimension
 			var districtDimension = cf.dimension(function(d) { return d.DistrictNummer; });
-			
+			var monthDimension = cf.dimension(function(d) { return d.Maand; });
+			var yearDimension = cf.dimension(function(d) { return d.Jaar; });
+					
 			// Create the groups for these two dimensions (i.e. sum the metric)
 			var whereGroupSum = whereDimension.group().reduceSum(function(d) { return d.R2HaantalActief;});
 			var districtGroupSum = districtDimension.group().reduceSum(function(d) { return d.R2HaantalActief;});
+			
+			// set month and year to last available in dataset
+			var monthAccessor = function (d) { return d.Maand; };
+			var yearAccessor = function (d) { return d.Jaar; };
+			
+			var monthExtent = [];
+			var yearExtent = [];
+			monthExtent = d3.extent(d.Rapportage, monthAccessor);
+			yearExtent = d3.extent(d.Rapportage, yearAccessor);
+			
+			var maxMonth = monthExtent[1];
+			var maxYear = yearExtent[1];
+			
+			monthDimension.filter(maxMonth);
+			yearDimension.filter(maxYear);
 			
 			// Create customized reduce-functions to be able to calculated percentages over all or multiple districts (i.e. the % of male volunteers))
 			var reduceAddAvg = function(metric) {
@@ -195,6 +215,36 @@ angular.module('dashboards')
 			var numberFormat = d3.format(',');
 			var numberFormatPerc = d3.format(',.1%');
 			
+			// set month selector
+			d3.select('#yearselector')
+				.on('change', function () {
+						var year = Number(d3.select(this).property('value'));
+						yearDimension.filter(year);
+						dc.redrawAll();
+					})
+				
+				.selectAll('option')
+				.data(d3.map(d.Rapportage, function(da){return da.Jaar;}).keys())
+				.enter().append('option')
+				.property('selected', function(d) { return Number(d) === maxYear;})
+				.text(function(d) { return d; })
+				.attr('value',  function(d) { return d; });
+				
+			// set month selector
+			d3.select('#monthselector')
+				.on('change', function () {
+						var month = Number(d3.select(this).property('value'));
+						monthDimension.filter(month);
+						dc.redrawAll();
+					})
+				
+				.selectAll('option')
+				.data(d3.map(d.Rapportage, function(da){return da.Maand;}).keys())
+				.enter().append('option')
+				.property('selected', function(d) { return Number(d) === maxMonth;})
+				.text(function(d) { return d; })
+				.attr('value',  function(d) { return d; });
+				
 			//Create the map-chart
 			mapChart
 				.width($('#map-chart').width())
@@ -216,7 +266,7 @@ angular.module('dashboards')
 				.renderPopup(true)
 				.turnOnControls(true)
 				;
-			
+	
 			//Create the row-chart 
 			districtChart
 				.width(350)
