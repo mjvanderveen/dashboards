@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('dashboards')
-	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'Sources', '$window', '$stateParams', 'cfpLoadingBar',
-	function($scope, $q, Authentication, Dashboards, Sources, $window, $stateParams, cfpLoadingBar) {
+	.controller('DistrictDashboardsController', ['$scope', '$q', 'Authentication', 'Dashboards', 'Sources', '$window', '$stateParams', 'cfpLoadingBar', '_',
+	function($scope, $q, Authentication, Dashboards, Sources, $window, $stateParams, cfpLoadingBar, _) {
 
 		$scope.authentication = Authentication;
 		$scope.geom = null;
@@ -44,6 +44,40 @@ angular.module('dashboards')
 				
 					
 		};  
+
+		/**
+		 * compare district report month by month
+		 * dataset has 25 districts
+		 * compare all properties except (DistrictNummer, District, Jaar, Maand, date)
+		 * assumes that the data is in a ordered list, with each district in exactly the same position in the list every month
+		 */
+		$scope.compareMonthlyDistrictData = function(report){
+			var size = 25;
+			for(var i = 0; i < report.length; i++){
+				for(var propt in report[i]){
+					// Do not calculate for these properties
+					if(['DistrictNummer', 'District', 'Jaar', 'Maand', 'date'].indexOf(propt) > -1){
+						continue;
+					}
+					
+					// skip the first batch as these cannot be compared to the previous month
+					if(i < size){
+						report[i][propt + 'Comparison'] = 0;
+					}
+					else {
+						// Double check that we are comparing the right district
+						if(report[i].District === report[i-size].District){
+							report[i][propt + 'Comparison'] =  report[i][propt] - report[i-size][propt];
+						}
+						else {
+							report[i][propt + 'Comparison'] = null;
+						}
+					}
+				}
+			}
+			
+			return report;
+		};
 		
 		/**
 		 * get the data from the files as defined in the config.
@@ -67,6 +101,9 @@ angular.module('dashboards')
 		  d.Rapportage.forEach(function(d) {
 				d.date = new Date(d.Jaar,d.Maand);
 		  });
+		  
+		  // compare data between months for each district
+		  d.Rapportage = $scope.compareMonthlyDistrictData(d.Rapportage);
 					
 		  $scope.generateCharts(d);
 		  
@@ -85,6 +122,26 @@ angular.module('dashboards')
 		};
 		
 		/**
+		 * function to find object property value by path
+		 * separate with .
+		 */
+		$scope.deepFind = function deepFind(obj, path) {
+			  var paths = path.split('.'),
+				  current = obj,
+				  i;
+
+			  for (i = 0; i < paths.length; ++i) {
+				if (current[paths[i]] === undefined) {
+				  return undefined;
+				} else {
+				  current = current[paths[i]];
+				}
+			  }
+			  return current;
+		};
+
+		
+		/**
 		 * function to generate the 3W component
 		 * data is loaded from the data set
 		 * geom is geojson file
@@ -100,6 +157,14 @@ angular.module('dashboards')
 						
 			// get the lookup table
 			var lookup = $scope.genLookup();
+			
+			// get month and year from last available in dataset
+			var monthAccessor = function (d) { return d.Maand; };
+			var yearAccessor = function (d) { return d.Jaar; };
+			var monthExtent = d3.extent(d.Rapportage, monthAccessor);
+			var yearExtent = d3.extent(d.Rapportage, yearAccessor);
+			var maxMonth = monthExtent[1];
+			var maxYear = yearExtent[1];
 			
 			/* create a crossfilter object from the data
 			 * Data arrays are of same length
@@ -118,21 +183,15 @@ angular.module('dashboards')
 			var districtDimension = cf.dimension(function(d) { return d.DistrictNummer; });
 			var monthDimension = cf.dimension(function(d) { return d.Maand; });
 			var yearDimension = cf.dimension(function(d) { return d.Jaar; });
+			
+			// set the filters
+			monthDimension.filter(maxMonth);
+			yearDimension.filter(maxYear);
 					
 			// Create the groups for these two dimensions (i.e. sum the metric)
 			var whereGroupSum = whereDimension.group().reduceSum(function(d) { return d.R2HaantalActief;});
 			var districtGroupSum = districtDimension.group().reduceSum(function(d) { return d.R2HaantalActief;});
-			
-			// set month and year to last available in dataset
-			var monthAccessor = function (d) { return d.Maand; };
-			var yearAccessor = function (d) { return d.Jaar; };
-			var monthExtent = d3.extent(d.Rapportage, monthAccessor);
-			var yearExtent = d3.extent(d.Rapportage, yearAccessor);
-			var maxMonth = monthExtent[1];
-			var maxYear = yearExtent[1];
-			monthDimension.filter(maxMonth);
-			yearDimension.filter(maxYear);
-			
+				
 			// Create customized reduce-functions to be able to calculated percentages over all or multiple districts (i.e. the % of male volunteers))
 			var reduceAddAvg = function(metric) {
 				return function(p,v) {
@@ -325,245 +384,67 @@ angular.module('dashboards')
 				else if ($('div.active').index() === 2) {$scope.go('RHTotaal');}
 			};
 			
+			var tables = [
+							{id: '#data-table2', name: 'Aantal inwoners', datatype: 'number', group: 'algemeen', propertyPath: 'value', dimension: ALGaantalinwonersGroup},
+							{id: '#data-table3', name: 'Aantal gemeenten', datatype: 'number', group: 'algemeen', propertyPath: 'value', dimension: ALGaantalgemeentenGroup},
+							{id: '#data-table4', name: 'Aantal vrijwilligers', datatype: 'number', group: 'vrijwilligersmanagement', propertyPath: 'value', dimension: TotaalaantalVWGroup},
+							{id: '#data-table5', name: 'Aantal Ready2Helpers', datatype: 'number', group: 'vrijwilligersmanagement', propertyPath: 'value', dimension: R2HaantalActiefGroup},
+							{id: '#data-table6', name: 'Aantal bestuursleden', datatype: 'number', group: 'vrijwilligersmanagement', propertyPath: 'value', dimension: ALGaantalbestuursledenGroup},
+							{id: '#data-table7', name: 'Mannen', datatype: 'percentage', group: 'vrijwilligersmanagement', propertyPath: 'value.finalVal', dimension: GeslachtManGroup},
+							{id: '#data-table8', name: 'Vrouwen', datatype: 'percentage', group: 'vrijwilligersmanagement', propertyPath: 'value.finalVal', dimension: GeslachtVrouwGroup},
+							{id: '#data-table9', name: 'Leeftijd: <18', datatype: 'percentage', group: 'vrijwilligersmanagement', propertyPath: 'value.finalVal', dimension: LeeftijdOnder18Group},
+							{id: '#data-table10', name: 'Leeftijd: 18-30', datatype: 'percentage', group: 'vrijwilligersmanagement', propertyPath: 'value.finalVal', dimension: Leeftijd18tot30Group},
+							{id: '#data-table11', name: 'Leeftijd: 30-50', datatype: 'percentage', group: 'vrijwilligersmanagement', propertyPath: 'value.finalVal', dimension: Leeftijd30tot50Group},
+							{id: '#data-table12', name: 'Leeftijd: 50-65', datatype: 'percentage', group: 'vrijwilligersmanagement', propertyPath: 'value.finalVal', dimension: Leeftijd50tot65Group},
+							{id: '#data-table13', name: 'Leeftijd: 65-85', datatype: 'percentage', group: 'vrijwilligersmanagement', propertyPath: 'value.finalVal', dimension: Leeftijd65tot85Group},
+							{id: '#data-table14', name: 'Aantal vrijwilligers totaal', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: NHTotaalGroup},
+							{id: '#data-table15', name: 'Aantal bestuursleden', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: ALGaantalbestuursledenGroup},
+							{id: '#data-table16', name: 'Aantal coördinatoren', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: NHCoordinatorGroup},
+							{id: '#data-table17', name: 'Aantal vrijwilligers BZO', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: NHBZOGroup},
+							{id: '#data-table18', name: 'Aantal vrijwilligers EHV', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: NHEVHGroup},
+							{id: '#data-table19', name: 'Aantal vrijwilliger NHT', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: NHNHTGroup},
+							{id: '#data-table20', name: 'Aantal vrijwilligers overig', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: NHOverigGroup},
+							{id: '#data-table21', name: 'Aantal overlap', datatype: 'number', group: 'noodhulp', propertyPath: 'value', dimension: NHOverlapGroup},
+							{id: '#data-table22', name: 'Aantal vrijwilligers', datatype: 'number', group: 'fondsenwerving', propertyPath: 'value', dimension: FWTotaalGroup},
+							{id: '#data-table23', name: 'Aantal bestuursleden', datatype: 'number', group: 'fondsenwerving', propertyPath: 'value', dimension: FWBestuurGroup},
+							{id: '#data-table24', name: 'Aantal coördinatoren', datatype: 'number', group: 'fondsenwerving', propertyPath: 'value', dimension: FWCoordinatorGroup},
+							{id: '#data-table25', name: 'Aantal vrijwilligers', datatype: 'number', group: 'communicatie', propertyPath: 'value', dimension: COMTotaalGroup},
+							{id: '#data-table26', name: 'Aantal bestuursleden', datatype: 'number', group: 'communicatie', propertyPath: 'value', dimension: COMBestuurGroup},
+							{id: '#data-table27', name: 'Aantal coördinatoren', datatype: 'number', group: 'communicatie', propertyPath: 'value', dimension: COMCoordinatorGroup},
+							{id: '#data-table28', name: 'Aantal vrijwilligers', datatype: 'number', group: 'respect en hulpbereidheid', propertyPath: 'value', dimension: RHTotaalGroup},
+							{id: '#data-table29', name: 'Aantal bestuursleden', datatype: 'number', group: 'respect en hulpbereidheid', propertyPath: 'value', dimension: RHBestuurGroup},
+							{id: '#data-table30', name: 'Aantal coördinatoren', datatype: 'number', group: 'respect en hulpbereidheid', propertyPath: 'value', dimension: RHCoordinatorGroup},
+							{id: '#data-table31', name: 'Aantal vrijwilligers', datatype: 'number', group: 'respect en hulpbereidheid', propertyPath: 'value', dimension: ZELFTotaalGroup},
+							{id: '#data-table32', name: 'Aantal bestuursleden', datatype: 'number', group: 'respect en hulpbereidheid', propertyPath: 'value', dimension: ZELFBestuurGroup},
+							{id: '#data-table33', name: 'Aantal coördinatoren', datatype: 'number', group: 'respect en hulpbereidheid', propertyPath: 'value', dimension: ZELFCoordinatorGroup}
+	
+						 ];
+						 
 			// create the data tables: because metrics are in columns in the data set and not in rows, we need one data-table per metric
-			// ALGEMEEN
-			dc.dataTable('#data-table2')
-						.dimension(ALGaantalinwonersGroup)                
+			tables.forEach(function(t) {
+				dc.dataTable(t.id)
+						.dimension(t.dimension)                
 						.group(function (i) {return ''; })
 						.width(200)
-						.columns([function(d){return 'Aantal inwoners';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						
-						;
-			dc.dataTable('#data-table3')
-						.dimension(ALGaantalgemeentenGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal gemeenten';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;
-			
-			// VRIJWILLIGERSMANAGEMENT			
-			dc.dataTable('#data-table4')
-						.dimension(TotaalaantalVWGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal vrijwilligers';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table5')
-						.dimension(R2HaantalActiefGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal Ready2Helpers';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table6')
-						.dimension(ALGaantalbestuursledenGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal bestuursleden';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table7')
-						.dimension(GeslachtManGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Mannen';}, function(d){return numberFormatPerc(d.value.finalVal);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table8')
-						.dimension(GeslachtVrouwGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Vrouwen';}, function(d){return numberFormatPerc(d.value.finalVal);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table9')
-						.dimension(LeeftijdOnder18Group)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Leeftijd: <18';}, function(d){return numberFormatPerc(d.value.finalVal);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table10')
-						.dimension(Leeftijd18tot30Group)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Leeftijd: 18-30';}, function(d){return numberFormatPerc(d.value.finalVal);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table11')
-						.dimension(Leeftijd30tot50Group)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Leeftijd: 30-50';}, function(d){return numberFormatPerc(d.value.finalVal);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table12')
-						.dimension(Leeftijd50tot65Group)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Leeftijd: 50-65';}, function(d){return numberFormatPerc(d.value.finalVal);}])
-						.order(d3.descending)
-						;
-			dc.dataTable('#data-table13')
-						.dimension(Leeftijd65tot85Group)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Leeftijd: 65-85';}, function(d){return numberFormatPerc(d.value.finalVal);}])
-						.order(d3.descending)
-						;
-			
-			// NOODHULP			
-			dc.dataTable('#data-table14')
-						.dimension(NHTotaalGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal vrijwilligers totaal';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;			
-			dc.dataTable('#data-table15')
-						.dimension(NHBestuurGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal bestuursleden';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;				
-			dc.dataTable('#data-table16')
-						.dimension(NHCoordinatorGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal coördinatoren';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;				
-			dc.dataTable('#data-table17')
-						.dimension(NHBZOGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal vrijwilligers BZO';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;				
-			dc.dataTable('#data-table18')
-						.dimension(NHEVHGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal vrijwilligers EVH';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;				
-			dc.dataTable('#data-table19')
-						.dimension(NHNHTGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal vrijwilligers NHT';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;				
-			dc.dataTable('#data-table20')
-						.dimension(NHOverigGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal vrijwilligers Overig';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;				
-			dc.dataTable('#data-table21')
-						.dimension(NHOverlapGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Aantal overlap';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-
-			// FONDSENWERVING	
-			dc.dataTable('#data-table22')
-						.dimension(FWTotaalGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal vrijwilligers';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table23')
-						.dimension(FWBestuurGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal bestuur';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table24')
-						.dimension(FWCoordinatorGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal coordinator';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-						
-			//COMMUNICATIE
-			dc.dataTable('#data-table25')
-						.dimension(COMTotaalGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal vrijwilligers';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table26')
-						.dimension(COMBestuurGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal bestuur';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table27')
-						.dimension(COMCoordinatorGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal coordinator';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;								
-
-			// RESPECT & HULPBEREIDHEID	
-			dc.dataTable('#data-table28')
-						.dimension(RHTotaalGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal vrijwilligers';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table29')
-						.dimension(RHBestuurGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal bestuur';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table30')
-						.dimension(RHCoordinatorGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal coordinator';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-						
-			//ZELFREDZAAMHEID
-			dc.dataTable('#data-table31')
-						.dimension(ZELFTotaalGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal vrijwilligers';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table32')
-						.dimension(ZELFBestuurGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal bestuur';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;	
-			dc.dataTable('#data-table33')
-						.dimension(ZELFCoordinatorGroup)                
-						.group(function (i) {return ''; })
-						.width(200)
-						.columns([function(d){return 'Totaal coordinator';}, function(d){return numberFormat(d.value);}])
-						.order(d3.descending)
-						;							
+						.columns([
+									// name of variable
+									function(d){return t.name;}, 
+									// the value
+									function(d){
+										if(t.datatype === 'number'){
+											return numberFormat($scope.deepFind(d, t.propertyPath));
+										} else if(t.datatype === 'percentage'){
+											return numberFormatPerc($scope.deepFind(d, t.propertyPath));
+										}
+									},
+									// if the value is lower, equal or higher then the previous period
+									function(d){
+										return '';
+									}
+									
+							])
+						.order(d3.descending);
+			});												
 						
 			//Render all dc-charts and -tables
 			dc.renderAll();
