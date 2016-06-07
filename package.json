@@ -51,8 +51,7 @@
     "path": "0.12.x",
     "request": "2.38.x",
     "swig": "1.4.x",
-    "url": "0.11.x",
-	"sharepointconnector": "*"
+    "url": "0.11.x"
   },
   "devDependencies": {
     "supertest": "*",

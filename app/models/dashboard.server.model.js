@@ -128,26 +128,6 @@ var CartoDBSourceSchema = new BaseSchema({
 	}
 });
 
-var SharepointSourceSchema = new BaseSchema({
-    file: {
-        type: String,
-        trim: true,
-        default: '',
-	    required:true,
-		form:  {label:'File identifier', size:'large', order: 4}
-    },
-	context:{ 
-		type: String, 
-		default: '', 
-	},
-	format: {
-		 type: String, 
-		 default: 'GeoJSON', 
-		 enum: ['GeoJSON', 'Array'],
-		 form:  {label:'File Format', size:'large', order: 5}
-	}
-});
-
 
 var Source;
 
@@ -162,7 +142,6 @@ Source.discriminator('FileLocalSource', FileLocalSourceSchema);
 Source.discriminator('DropboxSource', DropboxSourceSchema);
 Source.discriminator('GoogleSpreadsheetSource', GoogleSpreadsheetSourceSchema);
 Source.discriminator('CartoDBSource', CartoDBSourceSchema);
-Source.discriminator('SharepointSource', SharepointSourceSchema);
 
 /**
  * Dashboard Schema
@@ -216,9 +195,6 @@ var DashboardSchema = new Schema({
 	},
 	GoogleSpreadsheetSources: {
 		type: [GoogleSpreadsheetSourceSchema]
-	},
-	SharepointSources: {
-		type: [SharepointSourceSchema]
 	},
 	user: {
 		type: Schema.ObjectId,

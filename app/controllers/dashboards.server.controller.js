@@ -17,7 +17,6 @@ var mongoose = require('mongoose'),
 	Converter = require('csvtojson').Converter,
 	secrets = require('../../config/secrets'),
 	dbClient = new Dropbox.Client(secrets.dropbox),
-	sharepoint = require('sharepointconnector')(secrets.sharepoint),
 	fs = require('fs'),
 	request =   require('request');
 
@@ -173,14 +172,6 @@ var getSources = function(dashboard, callback){
 	(function(source) {
 		  if(source.isActive){
 				tasks.push(exports.getCartoDB(source));
-		  }				  
-		})(source);
-	});
-	
-	dashboard.SharepointSources.forEach(function(source, index) {
-	(function(source) {
-		  if(source.isActive){
-				tasks.push(exports.getSharepointFile(source));
 		  }				  
 		})(source);
 	});
@@ -387,28 +378,6 @@ exports.getFileLocal = function(source){
 			  
 			});
 	  };
-};
-
-exports.getSharepointFile = function(source){
-	return function(cb){
-		var data = {};
-		sharepoint.login(function(err){
-		  if (err){
-			return cb(err);
-		  }
-		  
-		  // Once logged in, we can list the "lists" within sharepoint
-		  sharepoint.lists.list(function(err, listRes){
-			  var aList = listRes[0];
-			// We can pick a particular list, and read it. This also gives us the list's Items[] and Fields[]
-			sharepoint.lists.read(aList.Id, function(err, listRead){
-			  console.log(listRead);
-			});
-		  });
-		  
-		  cb(null, data);
-		});
-	};
 };
 
 /*
